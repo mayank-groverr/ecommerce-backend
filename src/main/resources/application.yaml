@@ -1,5 +1,4 @@
-spring:
-  server:
-    servlet:
-      context-path:  /ecommerce-app
-    port: 8080
+server:
+  servlet:
+    context-path: /ecommerce-app
+  port: 8080

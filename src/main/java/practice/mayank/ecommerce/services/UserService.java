@@ -1,6 +1,8 @@
 package practice.mayank.ecommerce.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import practice.mayank.ecommerce.entities.User;
 import practice.mayank.ecommerce.repositories.UserRepository;
@@ -13,13 +15,18 @@ public class UserService {
    @Autowired
    private UserRepository userRepository;
 
+
+   private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
    public void createNewUser(User user){
+       user.getRoles().add("USER");
+       user.setPassword(passwordEncoder.encode(user.getPassword()));
        userRepository.save(user);
    }
 
-   public boolean updateUser(User user){
+   public void updateUser(User user){
+       user.setPassword(passwordEncoder.encode(user.getPassword()));
        userRepository.save(user);
-       return true;
    }
 
    public User findUserByEmail(String email){
@@ -28,6 +35,6 @@ public class UserService {
    }
 
    public void deleteUser(User user){
-       userRepository.delete(user);
+       userRepository.deleteById(user.getEmail());
    }
 }
