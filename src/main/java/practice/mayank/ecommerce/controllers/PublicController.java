@@ -1,6 +1,6 @@
 package practice.mayank.ecommerce.controllers;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -9,10 +9,10 @@ import practice.mayank.ecommerce.services.UserService;
 
 @RestController
 @RequestMapping("/public")
+@RequiredArgsConstructor
 public class PublicController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
     @GetMapping("/health-check")
     public String healthCheck() {

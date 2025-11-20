@@ -1,6 +1,6 @@
 package practice.mayank.ecommerce.controllers;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -11,10 +11,11 @@ import practice.mayank.ecommerce.services.UserService;
 
 @RestController
 @RequestMapping("/admin")
+@RequiredArgsConstructor
 public class AdminController {
 
-    @Autowired
-    private UserService userService;
+
+    private final UserService userService;
 
     @PostMapping
     public ResponseEntity<User> createNewAdmin(@RequestBody User user){
@@ -42,7 +43,7 @@ public class AdminController {
     }
 
     @DeleteMapping
-    public ResponseEntity<?> deleteUser(){
+    public ResponseEntity<HttpStatus> deleteUser(){
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         User userByEmail = userService.findUserByEmail(auth.getName());
         if(userByEmail != null){
