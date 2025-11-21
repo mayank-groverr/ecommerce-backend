@@ -4,7 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import practice.mayank.ecommerce.entities.User;
+import practice.mayank.ecommerce.dtos.request.UserRequest;
+import practice.mayank.ecommerce.dtos.response.UserResponse;
+import practice.mayank.ecommerce.mapper.GenericMapper;
 import practice.mayank.ecommerce.services.UserService;
 
 @RestController
@@ -20,14 +22,11 @@ public class PublicController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<User> signUp(@RequestBody User user) {
-        if (user != null) {
-            userService.createNewUser(user);
-            return new ResponseEntity<>(user, HttpStatus.CREATED);
-
-        }
-        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    public ResponseEntity<UserResponse> signUp(@RequestBody UserRequest user) {
+        UserResponse newUser = userService.createNewUser(user);
+        return new ResponseEntity<>(newUser, HttpStatus.CREATED);
     }
+
 
 
 }
