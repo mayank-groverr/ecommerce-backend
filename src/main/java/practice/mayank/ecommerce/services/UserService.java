@@ -20,6 +20,11 @@ public class UserService {
     private final GenericMapper genericMapper;
 
 
+    public UserResponse getUser(String email) {
+        User finalUser = findUserByEmail(email);
+        return genericMapper.userToUserResponse(finalUser);
+    }
+
     public UserResponse createNewUser(UserRequest userRequest) {
         User finalUser = genericMapper.userRequestToUser(userRequest);
         finalUser.getRoles().add("USER");
@@ -38,26 +43,27 @@ public class UserService {
     }
 
     public UserResponse updateUser(String email, UserRequest userRequest) {
-        try{
+        try {
             User userInDb = findUserByEmail(email);
-            userInDb.setName((userRequest.getName() != null && !userRequest.getName().isEmpty())? userRequest.getName() : userInDb.getName());
-            userInDb.setEmail((userRequest.getEmail() != null && !userRequest.getEmail().isEmpty())? userRequest.getEmail() : userInDb.getEmail());
-            userInDb.setMobileNumber((userRequest.getMobileNumber() != null && !userRequest.getMobileNumber().isEmpty())? userRequest.getMobileNumber() : userInDb.getMobileNumber());
-            if ( userRequest.getPassword() != null && !userRequest.getPassword().isEmpty() ){
+            userInDb.setName((userRequest.getName() != null && !userRequest.getName().isEmpty()) ? userRequest.getName() : userInDb.getName());
+            userInDb.setEmail((userRequest.getEmail() != null && !userRequest.getEmail().isEmpty()) ? userRequest.getEmail() : userInDb.getEmail());
+            userInDb.setMobileNumber((userRequest.getMobileNumber() != null && !userRequest.getMobileNumber().isEmpty()) ? userRequest.getMobileNumber() : userInDb.getMobileNumber());
+            if (userRequest.getPassword() != null && !userRequest.getPassword().isEmpty()) {
                 userInDb.setPassword(passwordEncoder.encode(userRequest.getPassword()));
             }
             userRepository.save(userInDb);
             return genericMapper.userToUserResponse(userInDb);
-        }catch (Exception e){
+        } catch (Exception e) {
             return null;
         }
     }
 
-    public User findUserByEmail(String email) throws NullPointerException {
+    public User findUserByEmail(String email) {
         return userRepository.findByEmail(email);
     }
+
     public boolean deleteUser(String email) {
-        try{
+        try {
             User userInDb = findUserByEmail(email);
             userRepository.delete(userInDb);
             return true;

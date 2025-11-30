@@ -8,8 +8,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import practice.mayank.ecommerce.dtos.request.UserRequest;
 import practice.mayank.ecommerce.dtos.response.UserResponse;
-import practice.mayank.ecommerce.entities.User;
-import practice.mayank.ecommerce.mapper.GenericMapper;
 import practice.mayank.ecommerce.services.UserService;
 
 @RestController
@@ -19,6 +17,16 @@ public class UserController {
 
 
     private final UserService userService;
+
+    @GetMapping
+    public ResponseEntity<UserResponse> getDetails() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserResponse user = userService.getUser(authentication.getName());
+        if (user != null) {
+            return new ResponseEntity<>(user,HttpStatus.FOUND);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
 
     @PatchMapping
     public ResponseEntity<UserResponse> updateUser(@RequestBody UserRequest user) {

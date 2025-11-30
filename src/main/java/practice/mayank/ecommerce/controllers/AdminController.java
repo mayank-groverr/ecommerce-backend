@@ -18,13 +18,23 @@ public class AdminController {
 
     private final UserService userService;
 
+    @GetMapping
+    public ResponseEntity<UserResponse> getDetails() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserResponse user = userService.getUser(authentication.getName());
+        if (user != null) {
+            return new ResponseEntity<>(user,HttpStatus.FOUND);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
     @PostMapping
     public ResponseEntity<UserResponse> createNewAdmin(@RequestBody UserRequest user) {
         UserResponse newAdmin = userService.createNewAdmin(user);
         return new ResponseEntity<>(newAdmin, HttpStatus.CREATED);
     }
 
-    @PatchMapping
+    @PutMapping
     public ResponseEntity<UserResponse> updateDetails(@RequestBody UserRequest user) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         UserResponse userResponse = userService.updateUser(auth.getName(), user);
