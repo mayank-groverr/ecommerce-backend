@@ -1,3 +1,7 @@
 spring:
   application:
     name: Ecommerce Application
+
+server:
+  servlet:
+    context-path: /ecommerce-app
