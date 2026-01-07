@@ -31,7 +31,7 @@ public class SecurityConfig {
                         auth
                                 .requestMatchers("/public/**").permitAll()
                                 .requestMatchers("/user/**").authenticated()
-                                .requestMatchers("/admin/**").hasRole(Role.ADMIN.name()))
+                                .requestMatchers("/admin/**").hasRole("ADMIN"))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)

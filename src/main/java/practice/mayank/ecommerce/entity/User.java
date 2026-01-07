@@ -1,9 +1,9 @@
 package practice.mayank.ecommerce.entity;
 
+import jakarta.persistence.*;
 import lombok.Data;
-import org.bson.types.ObjectId;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,27 +12,47 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Data
-@Document("user")
+@Entity
+@Table(name = "users")
 public class User implements UserDetails {
 
     @Id
-    private ObjectId id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "user_id")
+    private String userId;
+
+    @Column(name = "user_name")
     private String name;
-    private String email;
+
+    @Column(name = "user_email")
+    private String userEmail;
+
+    @Column(name = "mobile_number")
     private String mobileNumber;
+
+    @Column(name = "user_password")
     private String password;
+
+    @Column(name = "is_enabled")
     private boolean isEnabled = true;
+
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
     private Set<Role> roles = new HashSet<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles.stream()
-                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.name())).toList();
+                .map(role -> new SimpleGrantedAuthority(role.getRoleName())).toList();
     }
 
     @Override
     public String getUsername() {
-        return email;
+        return userEmail;
     }
 
     @Override
@@ -52,6 +72,6 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return isEnabled;
+        return this.isEnabled;
     }
 }

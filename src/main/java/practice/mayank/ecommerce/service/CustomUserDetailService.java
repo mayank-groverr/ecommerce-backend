@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import practice.mayank.ecommerce.entity.User;
 import practice.mayank.ecommerce.repository.UserRepository;
 
+import java.util.Optional;
+
 
 @Service
 @RequiredArgsConstructor
@@ -17,9 +19,9 @@ public class CustomUserDetailService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userRepository.findByEmail(email);
-        if(user != null){
-            return user;
+        Optional<User> user = userRepository.findByUserEmail(email);
+        if(user.isPresent()){
+            return user.get();
         }
         throw new UsernameNotFoundException("User Not found");
     }

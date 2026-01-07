@@ -1,10 +1,13 @@
 package practice.mayank.ecommerce.repository;
 
-import org.bson.types.ObjectId;
-import org.springframework.data.mongodb.repository.MongoRepository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
 import practice.mayank.ecommerce.entity.User;
 
+import java.util.Optional;
+import java.util.UUID;
 
-public interface UserRepository extends MongoRepository<User, ObjectId> {
-    User findByEmail(String email);
+
+public interface UserRepository extends JpaRepository<User, UUID> {
+    Optional<User> findByUserEmail(String email);
 }

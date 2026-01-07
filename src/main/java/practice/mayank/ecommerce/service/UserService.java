@@ -8,10 +8,11 @@ import org.springframework.stereotype.Service;
 import practice.mayank.ecommerce.dto.LoginRequest;
 import practice.mayank.ecommerce.dto.UserRequest;
 import practice.mayank.ecommerce.dto.UserResponse;
-import practice.mayank.ecommerce.entity.Role;
 import practice.mayank.ecommerce.entity.User;
 import practice.mayank.ecommerce.mapper.GenericMapper;
 import practice.mayank.ecommerce.repository.UserRepository;
+
+import java.util.Optional;
 
 
 @Service
@@ -22,6 +23,7 @@ public class UserService {
     private final GenericMapper genericMapper;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
+    private final RoleService roleService;
 
     public UserResponse getUser(String email) {
         User userInDb = findUserByEmail(email);
@@ -30,7 +32,7 @@ public class UserService {
 
     public UserResponse createNewUser(UserRequest userRequest) {
         User user = genericMapper.userRequestToUser(userRequest);
-        user.getRoles().add(Role.USER);
+        user.getRoles().add(roleService.makeUser());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         User newUser = userRepository.save(user);
         return genericMapper.userToUserResponse(newUser);
@@ -38,8 +40,8 @@ public class UserService {
 
     public UserResponse createNewAdmin(UserRequest userRequest) {
         User user = genericMapper.userRequestToUser(userRequest);
-        user.getRoles().add(Role.USER);
-        user.getRoles().add(Role.ADMIN);
+        user.getRoles().add(roleService.makeUser());
+        user.getRoles().add(roleService.makeAdmin());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         User newUser = userRepository.save(user);
         return genericMapper.userToUserResponse(newUser);
@@ -49,7 +51,6 @@ public class UserService {
         User user = genericMapper.userRequestToUser(userRequest);
         User userInDb = findUserByEmail(email);
         if (userInDb != null) {
-            userInDb.setEmail((user.getEmail() != null && !user.getEmail().isEmpty()) ? user.getEmail() : userInDb.getEmail());
             userInDb.setName((user.getName() != null && !user.getName().isEmpty()) ? user.getName() : userInDb.getName());
             userInDb.setMobileNumber((user.getMobileNumber() != null && !user.getMobileNumber().isEmpty()) ? user.getMobileNumber() : userInDb.getMobileNumber());
             if (user.getPassword() != null && !user.getPassword().isEmpty()) {
@@ -74,15 +75,16 @@ public class UserService {
     public User authenticate(LoginRequest loginRequest) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        loginRequest.email(),
+                        loginRequest.userEmail(),
                         loginRequest.password()));
 
-        return findUserByEmail(loginRequest.email());
+        return findUserByEmail(loginRequest.userEmail());
 
     }
 
     private User findUserByEmail(String email) {
-        return userRepository.findByEmail(email);
+        Optional<User> byEmail = userRepository.findByUserEmail(email);
+        return byEmail.orElse(null);
     }
 
 }

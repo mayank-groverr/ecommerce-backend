@@ -1,9 +1,20 @@
 package practice.mayank.ecommerce.entity;
 
-public enum Role {
+import jakarta.persistence.*;
+import lombok.Data;
 
-    ADMIN,
-    USER
 
+@Data
+@Entity
+@Table(name = "roles")
+public class Role {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "role_id")
+    private String id;
+
+    @Column(name = "role_name", unique = true, nullable = false)
+    private String roleName;
     
 }

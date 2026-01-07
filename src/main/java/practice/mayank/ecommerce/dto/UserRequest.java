@@ -1,7 +1,7 @@
 package practice.mayank.ecommerce.dto;
 
 public record UserRequest (String name,
-                           String email,
+                           String userEmail,
                            String mobileNumber,
                            String password
 )

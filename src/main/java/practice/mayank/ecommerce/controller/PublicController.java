@@ -40,7 +40,7 @@ public class PublicController {
 
         User user = userService.authenticate(loginRequest);
         if(user != null){
-            String token = jwtService.generateToken(user.getEmail());
+            String token = jwtService.generateToken(user.getUserEmail());
             return new ResponseEntity<>(token, HttpStatus.OK);
         }
         return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
