@@ -1,4 +1,4 @@
-package practice.mayank.ecommerce.controller;
+package practice.mayank.ecommerce.controller.admin;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -13,11 +13,17 @@ import practice.mayank.ecommerce.service.UserService;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/user")
-public class UserController {
+@RequestMapping("/admin")
+public class AdminController {
 
 
     private final UserService userService;
+
+    @PostMapping("/create")
+    public ResponseEntity<UserResponse> createNewAdmin(@RequestBody UserRequest userRequest){
+        UserResponse newUser = userService.createNewAdmin(userRequest);
+        return new ResponseEntity<>(newUser, HttpStatus.CREATED);
+    }
 
     @GetMapping("/get")
     public ResponseEntity<UserResponse> getDetail() {

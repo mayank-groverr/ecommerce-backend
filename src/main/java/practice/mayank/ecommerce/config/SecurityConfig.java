@@ -13,7 +13,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import practice.mayank.ecommerce.entity.Role;
 import practice.mayank.ecommerce.security.CustomAccessDeniedHandler;
 import practice.mayank.ecommerce.security.CustomAuthenticationEntryPoint;
 import practice.mayank.ecommerce.security.JwtAuthenticationFilter;
@@ -30,7 +29,7 @@ public class SecurityConfig {
         return http.authorizeHttpRequests(auth ->
                         auth
                                 .requestMatchers("/public/**").permitAll()
-                                .requestMatchers("/user/**").authenticated()
+                                .requestMatchers("/user/**").hasRole("USER")
                                 .requestMatchers("/admin/**").hasRole("ADMIN"))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .formLogin(AbstractHttpConfigurer::disable)
