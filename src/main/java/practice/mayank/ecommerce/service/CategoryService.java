@@ -3,13 +3,10 @@ package practice.mayank.ecommerce.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import practice.mayank.ecommerce.dto.CategoryDto;
-import practice.mayank.ecommerce.dto.ProductDto;
 import practice.mayank.ecommerce.entity.Category;
-import practice.mayank.ecommerce.entity.Product;
 import practice.mayank.ecommerce.exception.customexception.ResourceNotFoundException;
 import practice.mayank.ecommerce.mapper.GenericMapper;
 import practice.mayank.ecommerce.repository.CategoryRepository;
-import practice.mayank.ecommerce.repository.ProductRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -52,9 +49,11 @@ public class CategoryService {
     }
 
 
-    public boolean deleteProduct(String categoryName) {
+    public boolean deleteCategories(String categoryName) {
         try {
             Category categoryByName = getCategoryByName(categoryName);
+            Category nullCategory = getCategoryByName(null);
+            categoryByName.getProducts().forEach(product -> product.setCategory(nullCategory));
             categoryRepository.deleteByCategoryName(categoryByName.getCategoryName());
             return true;
         } catch (Exception e) {

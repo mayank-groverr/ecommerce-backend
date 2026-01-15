@@ -11,7 +11,6 @@ import practice.mayank.ecommerce.dto.UserResponse;
 import practice.mayank.ecommerce.entity.User;
 import practice.mayank.ecommerce.mapper.GenericMapper;
 import practice.mayank.ecommerce.repository.UserRepository;
-
 import java.util.Optional;
 
 
@@ -24,6 +23,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final RoleService roleService;
+    private final CartService cartService;
 
     public UserResponse getUser(String email) {
         User userInDb = findUserByEmail(email);
@@ -35,6 +35,7 @@ public class UserService {
         user.getRoles().add(roleService.makeUser());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         User newUser = userRepository.save(user);
+        cartService.createNewCart(user);
         return genericMapper.userToUserResponse(newUser);
     }
 
@@ -44,6 +45,7 @@ public class UserService {
         user.getRoles().add(roleService.makeAdmin());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         User newUser = userRepository.save(user);
+        cartService.createNewCart(user);
         return genericMapper.userToUserResponse(newUser);
     }
 

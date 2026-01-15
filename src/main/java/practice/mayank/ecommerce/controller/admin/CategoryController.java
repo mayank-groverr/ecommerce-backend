@@ -42,7 +42,7 @@ public class CategoryController {
 
     @DeleteMapping("/delete/name/{categoryName}")
     public ResponseEntity<ProductDto> deleteCategory(@PathVariable String categoryName) {
-        if (categoryService.deleteProduct(categoryName)) {
+        if (categoryService.deleteCategories(categoryName)) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);

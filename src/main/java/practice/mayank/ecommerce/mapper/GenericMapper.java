@@ -1,14 +1,10 @@
 package practice.mayank.ecommerce.mapper;
 
+import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import practice.mayank.ecommerce.dto.CategoryDto;
-import practice.mayank.ecommerce.dto.ProductDto;
-import practice.mayank.ecommerce.dto.UserRequest;
-import practice.mayank.ecommerce.dto.UserResponse;
-import practice.mayank.ecommerce.entity.Category;
-import practice.mayank.ecommerce.entity.Product;
-import practice.mayank.ecommerce.entity.User;
+import practice.mayank.ecommerce.dto.*;
+import practice.mayank.ecommerce.entity.*;
 
 
 @Mapper(componentModel = "spring")
@@ -28,5 +24,20 @@ public interface GenericMapper {
 
 
     CategoryDto categoryToCategoryDto(Category category);
+
+    Cart cartDtoToCart(CartDto cartDto);
+
+    CartDto cartToCartDto(Cart cart);
+
+
+    @BeanMapping(ignoreByDefault = true)
+    @Mapping(target = "product.productId" , source= "productId")
+    @Mapping(target = "quantity", source = "quantity")
+    CartItem cartItemDtoToCartItem(CartItemDto cartItemDto);
+
+    @BeanMapping(ignoreByDefault = true)
+    @Mapping(target = "productId" , source= "product.productId")
+    @Mapping(target = "quantity", source = "quantity")
+    CartItemDto cartItemToCartItemDto(CartItem cartItem);
 }
 
