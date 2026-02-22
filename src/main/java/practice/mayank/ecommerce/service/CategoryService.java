@@ -7,7 +7,6 @@ import practice.mayank.ecommerce.entity.Category;
 import practice.mayank.ecommerce.exception.customexception.ResourceNotFoundException;
 import practice.mayank.ecommerce.mapper.GenericMapper;
 import practice.mayank.ecommerce.repository.CategoryRepository;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -59,7 +58,6 @@ public class CategoryService {
         } catch (Exception e) {
             return false;
         }
-
     }
 
 }

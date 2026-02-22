@@ -1,6 +1,9 @@
 spring:
   application:
     name: Ecommerce Application
+  web:
+    resources:
+      add-mappings: false
 
 server:
   servlet:

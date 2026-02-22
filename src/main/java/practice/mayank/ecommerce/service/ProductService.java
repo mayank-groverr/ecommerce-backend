@@ -1,16 +1,21 @@
 package practice.mayank.ecommerce.service;
 
+import com.github.fge.jsonpatch.JsonPatch;
+import jakarta.validation.groups.Default;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import practice.mayank.ecommerce.dto.CategoryDto;
-import practice.mayank.ecommerce.dto.ProductDto;
+import org.springframework.transaction.annotation.Transactional;
+import practice.mayank.ecommerce.dto.product.ProductRequest;
+import practice.mayank.ecommerce.dto.product.ProductResponse;
 import practice.mayank.ecommerce.entity.Category;
 import practice.mayank.ecommerce.entity.Product;
 import practice.mayank.ecommerce.exception.customexception.ResourceNotFoundException;
-import practice.mayank.ecommerce.mapper.GenericMapper;
+import practice.mayank.ecommerce.mapper.ProductMapper;
 import practice.mayank.ecommerce.repository.ProductRepository;
-
-import java.util.List;
+import practice.mayank.ecommerce.util.PatchUtil;
+import practice.mayank.ecommerce.validation.handler.CustomValidationHandler;
 import java.util.Optional;
 
 @Service
@@ -18,103 +23,75 @@ import java.util.Optional;
 public class ProductService {
 
     private final ProductRepository productRepository;
-    private final GenericMapper genericMapper;
+    private final ProductMapper productMapper;
     private final CategoryService categoryService;
+    private final CustomValidationHandler customValidationHandler;
 
-    public ProductDto addNewProduct(ProductDto productDto) {
-        Product product = mapToProductWithExistingCategory(productDto);
+    @Transactional
+    public ProductResponse addNewProduct(ProductRequest productRequest) {
+        Product product = productMapper.productRequestToProductWithoutCategory(productRequest);
+        setProductCategory(product, productRequest);
         Product newProduct = productRepository.save(product);
-        return genericMapper.productToProductDto(newProduct);
+        return productMapper.productToProductResponse(newProduct);
     }
 
-    public List<ProductDto> getAllProduct() {
-        List<Product> allProducts = productRepository.findAll();
-        if (!allProducts.isEmpty()) {
-            return allProducts.stream().map(this::mapToProductDtoWithCategory).toList();
-        }
-        throw new ResourceNotFoundException("No Products Found");
+    public Page<ProductResponse> getAllProduct(int pageNumber, int pageSize) {
+        Page<Product> allProducts = productRepository.findAll(PageRequest.of(pageNumber, pageSize));
+        return allProducts.map(productMapper::productToProductResponse);
     }
 
 
-    public ProductDto getProductById(String productId) {
-        Optional<Product> productInDb = productRepository.findById(productId);
-        if (productInDb.isPresent()) {
-            return mapToProductDtoWithCategory(productInDb.get());
-        }
-        throw new ResourceNotFoundException("Product Not Found");
+    public ProductResponse getProductById(String productId) {
+        Product productInDb = findProductById(productId);
+        return productMapper.productToProductResponse(productInDb);
     }
 
-    public List<ProductDto> getAllProductsByCategory(CategoryDto categoryDto) {
-        Category category = categoryService.getCategoryByName(categoryDto.categoryName());
-        List<Product> allProducts = productRepository.findAllByCategory(category);
-        if (!allProducts.isEmpty()) {
-            return allProducts.stream().map(this::mapToProductDtoWithCategory).toList();
-        }
-        throw new ResourceNotFoundException("No Products Found for this category");
+    public Page<ProductResponse> getAllProductsByCategory(String categoryName, int pageNumber, int pageSize) {
+        Category category = categoryService.getCategoryByName(categoryName);
+        Page<Product> allProducts = productRepository.findAllByCategory(category, PageRequest.of(pageNumber, pageSize));
+        return allProducts.map(productMapper::productToProductResponse);
     }
 
-    public ProductDto updateProduct(String productId, ProductDto productDto) {
-        Product updatedproduct = genericMapper.productDtoToProduct(productDto);
-        Product productInDb = genericMapper.productDtoToProduct(getProductById(productId));
-        if (updatedproduct != null) {
-            productInDb.setProductName(
-                    (updatedproduct.getProductName() != null && !updatedproduct.getProductName().isEmpty()) ?
-                            updatedproduct.getProductName() :
-                            productInDb.getProductName());
-
-            productInDb.setProductDescription(
-                    (updatedproduct.getProductDescription() != null && !updatedproduct.getProductDescription().isEmpty()) ?
-                    updatedproduct.getProductDescription() :
-                    productInDb.getProductDescription());
-
-            productInDb.setProductPrice(
-                    (updatedproduct.getProductPrice() > 0) ?
-                            updatedproduct.getProductPrice() :
-                            productInDb.getProductPrice());
-
-            productInDb.setProductStock(
-                    (updatedproduct.getProductStock() >= 0) ?
-                    updatedproduct.getProductStock() :
-                    productInDb.getProductStock());
-
-
-            Product resolvedProduct = mapToProductWithExistingCategory(productDto);
-            productInDb.setCategory(resolvedProduct.getCategory());
-            Product saved = productRepository.save(productInDb);
-            return genericMapper.productToProductDto(saved);
-        }
-        throw new ResourceNotFoundException("Product Not Found");
+    public Page<ProductResponse> getAllUncategorizedProduct(int pageNumber, int pageSize) {
+        Page<Product> productsWithNullCategory = productRepository.findByCategoryIsNull(PageRequest.of(pageNumber, pageSize));
+        return productsWithNullCategory.map(productMapper::productToProductResponse);
     }
 
+    @Transactional
+    public ProductResponse updateProduct(String productId, JsonPatch jsonPatch)  {
+        Product productById = findProductById(productId);
+        ProductRequest patchRequest = productMapper.productToProductRequest(productById);
+        ProductRequest requestAfterChanges = PatchUtil.applyJsonPatch(jsonPatch, patchRequest, ProductRequest.class);
+        customValidationHandler.validate(requestAfterChanges, Default.class);
+        productMapper.updateExistingProduct(requestAfterChanges, productById);
+        setProductCategory(productById, requestAfterChanges);
+        return productMapper.productToProductResponse(productById);
+    }
 
-    public boolean deleteProduct(String productId) {
-        try {
-            Product productById = genericMapper.productDtoToProduct(getProductById(productId));
-            productRepository.delete(productById);
-            return true;
-        } catch (Exception e) {
-            return false;
+    @Transactional
+    public void deleteProduct(String productId) {
+        Product productById = findProductById(productId);
+        productRepository.delete(productById);
+    }
+
+    private Product findProductById(String productId) {
+        Optional<Product> product = productRepository.findById(productId);
+        return product.orElseThrow(() -> new  ResourceNotFoundException("No product found for productId: " + productId));
+    }
+
+    public void setProductCategory(Product product, ProductRequest productRequest){
+        if(productRequest.categoryDto() != null){
+            if(
+                    product.getCategory() != null &&
+                    productRequest.categoryDto().categoryName().equals(product.getCategory().getCategoryName()))
+            {
+                return;
+            }
+            Category categoryByName = categoryService.getCategoryByName(productRequest.categoryDto().categoryName());
+            product.setCategory(categoryByName);
+        }else{
+            product.setCategory(null);
         }
     }
-
-    private Product mapToProductWithExistingCategory(ProductDto productDto){
-        Category categoryInDB = categoryService.getCategoryByName(productDto.categoryDto().categoryName());
-        Product product = genericMapper.productDtoToProduct(productDto);
-        product.setCategory(categoryInDB);
-        return product;
-    }
-
-    private ProductDto mapToProductDtoWithCategory(Product product){
-        CategoryDto categoryDto = genericMapper.categoryToCategoryDto(product.getCategory());
-
-        return new ProductDto(product.getProductId(),
-                product.getProductName(),
-                product.getProductDescription(),
-                product.getProductPrice(),
-                product.getProductStock(),
-                product.getImageUrl(),
-                categoryDto);
-    }
-
 
 }

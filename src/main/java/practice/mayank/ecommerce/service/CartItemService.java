@@ -3,7 +3,7 @@ package practice.mayank.ecommerce.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import practice.mayank.ecommerce.dto.CartItemDto;
-import practice.mayank.ecommerce.dto.ProductDto;
+import practice.mayank.ecommerce.dto.product.ProductResponse;
 import practice.mayank.ecommerce.entity.Cart;
 import practice.mayank.ecommerce.entity.CartItem;
 import practice.mayank.ecommerce.exception.customexception.ResourceNotFoundException;
@@ -22,7 +22,7 @@ public class CartItemService {
 
 
     public void saveCartItem(CartItemDto cartItemDto, Cart cart) {
-        ProductDto productById = productService.getProductById(cartItemDto.productId());
+        ProductResponse productById = productService.getProductById(cartItemDto.productId());
         CartItem cartItem = genericMapper.cartItemDtoToCartItem(cartItemDto);
         if (cartItem.getQuantity() <= productById.productStock()) {
             if (itemAlreadyInCart(cart.getCartItems(), productById.productId())) {
@@ -47,7 +47,7 @@ public class CartItemService {
     }
 
     public void updateCartItem(Cart cart, CartItemDto cartItemDto) {
-        ProductDto productInDb = productService.getProductById(cartItemDto.productId());
+        ProductResponse productInDb = productService.getProductById(cartItemDto.productId());
         CartItem itemToBeUpdated = findCartItemByProductId(cart.getCartItems(), productInDb.productId());
         if (itemToBeUpdated != null && cartItemDto.quantity() <= productInDb.productStock()) {
             itemToBeUpdated.setQuantity(cartItemDto.quantity() + itemToBeUpdated.getQuantity());

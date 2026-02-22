@@ -5,10 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import practice.mayank.ecommerce.dto.CategoryDto;
-import practice.mayank.ecommerce.dto.ProductDto;
 import practice.mayank.ecommerce.service.CategoryService;
-
-
 import java.util.List;
 
 @RestController
@@ -41,7 +38,7 @@ public class CategoryController {
     }
 
     @DeleteMapping("/delete/name/{categoryName}")
-    public ResponseEntity<ProductDto> deleteCategory(@PathVariable String categoryName) {
+    public ResponseEntity<?> deleteCategory(@PathVariable String categoryName) {
         if (categoryService.deleteCategories(categoryName)) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }

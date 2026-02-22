@@ -4,6 +4,7 @@ import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import practice.mayank.ecommerce.dto.*;
+import practice.mayank.ecommerce.dto.product.ProductResponse;
 import practice.mayank.ecommerce.entity.*;
 
 
@@ -15,10 +16,10 @@ public interface GenericMapper {
     User userRequestToUser(UserRequest userRequest);
 
     @Mapping(source = "categoryDto" , target = "category")
-    Product productDtoToProduct(ProductDto productDto);
+    Product productDtoToProduct(ProductResponse productDto);
 
     @Mapping(source = "category" , target = "categoryDto")
-    ProductDto productToProductDto(Product product);
+    ProductResponse productToProductDto(Product product);
 
     Category categoryDtoToCategory(CategoryDto categoryDto);
 

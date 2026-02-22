@@ -25,18 +25,17 @@ public class Product {
     private  String productDescription;
 
     @Column(name = "product_price")
-    private double productPrice;
+    private Double productPrice;
 
-    @Column(name = "productStock")
-    private int productStock;
+    @Column(name = "product_Stock")
+    private Integer productStock;
 
     @Column(name = "image_url")
     private String imageUrl;
 
     @ManyToOne
     @JoinColumn(name = "category_id")
-    private Category category;
-
+    private Category  category;
 
     @OneToMany(mappedBy = "product" , cascade = CascadeType.ALL)
     private List<CartItem> cartItems;
