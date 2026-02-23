@@ -95,7 +95,6 @@ public class ProductController {
             @PathVariable
             String productId,
 
-            @Validated
             @RequestBody
             JsonPatch jsonPatch
     ) {

@@ -62,7 +62,7 @@ public class ProductService {
         Product productById = findProductById(productId);
         ProductRequest patchRequest = productMapper.productToProductRequest(productById);
         ProductRequest requestAfterChanges = PatchUtil.applyJsonPatch(jsonPatch, patchRequest, ProductRequest.class);
-        customValidationHandler.validate(requestAfterChanges, Default.class);
+        customValidationHandler.validate(requestAfterChanges);
         productMapper.updateExistingProduct(requestAfterChanges, productById);
         setProductCategory(productById, requestAfterChanges);
         return productMapper.productToProductResponse(productById);

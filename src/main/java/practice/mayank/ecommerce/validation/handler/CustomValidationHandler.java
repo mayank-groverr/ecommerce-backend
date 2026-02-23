@@ -21,4 +21,10 @@ public class CustomValidationHandler {
         }
     }
 
+    public <T> void validate(T valueToBeValidated){
+        Set<ConstraintViolation<T>> violations = validator.validate(valueToBeValidated);
+        if(!violations.isEmpty()){
+            throw new ConstraintViolationException(violations);
+        }
+    }
 }
