@@ -1,15 +1,13 @@
-package practice.mayank.ecommerce.dto;
-
-
+package practice.mayank.ecommerce.dto.category;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-public record CategoryDto(
+public record CategoryRequest(
 
         @NotBlank(message = "Category name cannot be blank")
-        @Size(max = 100, message = "Category name must be between 1 and 100 characters")
+        @Size(min = 1, max = 100, message = "Category name length must be between 1 and 100")
         String categoryName
 
-) {
+){
 }

@@ -12,12 +12,7 @@ import practice.mayank.ecommerce.entity.Category;
 import java.util.Optional;
 
 public interface CategoryRepository extends JpaRepository<Category, String> {
-    Optional<Category> findByCategoryName(String name);
-
-    @Modifying
-    @Transactional
-    @Query("UPDATE Category c SET c.categoryName = :newName WHERE c.categoryName = :oldName")
-    int updateCategoryByName(@Param("oldName") String oldName, @Param("newName") String newName);
+    Optional<Category> findByCategoryName(String categoryName);
 
     @Transactional
     void deleteByCategoryName(String name);

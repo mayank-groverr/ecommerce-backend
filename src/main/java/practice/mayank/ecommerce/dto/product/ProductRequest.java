@@ -4,7 +4,7 @@ package practice.mayank.ecommerce.dto.product;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
-import practice.mayank.ecommerce.dto.CategoryDto;
+import practice.mayank.ecommerce.dto.category.CategoryRequest;
 
 
 
@@ -28,7 +28,7 @@ public record ProductRequest(
         String imageUrl,
 
         @Valid
-        CategoryDto categoryDto
+        CategoryRequest categoryRequest
 
 ) {
 }

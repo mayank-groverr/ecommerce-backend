@@ -1,7 +1,8 @@
 package practice.mayank.ecommerce.dto.product;
 
 
-import practice.mayank.ecommerce.dto.CategoryDto;
+
+import practice.mayank.ecommerce.dto.category.CategoryResponse;
 
 public record ProductResponse(
         String productId,
@@ -10,6 +11,6 @@ public record ProductResponse(
         double productPrice,
         int productStock,
         String imageUrl,
-        CategoryDto categoryDto
+        CategoryResponse categoryResponse
 ){
 }

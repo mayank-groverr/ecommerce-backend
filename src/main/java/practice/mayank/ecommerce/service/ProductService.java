@@ -1,7 +1,6 @@
 package practice.mayank.ecommerce.service;
 
 import com.github.fge.jsonpatch.JsonPatch;
-import jakarta.validation.groups.Default;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -80,14 +79,14 @@ public class ProductService {
     }
 
     public void setProductCategory(Product product, ProductRequest productRequest){
-        if(productRequest.categoryDto() != null){
+        if(productRequest.categoryRequest() != null){
             if(
                     product.getCategory() != null &&
-                    productRequest.categoryDto().categoryName().equals(product.getCategory().getCategoryName()))
+                    productRequest.categoryRequest().categoryName().equals(product.getCategory().getCategoryName()))
             {
                 return;
             }
-            Category categoryByName = categoryService.getCategoryByName(productRequest.categoryDto().categoryName());
+            Category categoryByName = categoryService.getCategoryByName(productRequest.categoryRequest().categoryName());
             product.setCategory(categoryByName);
         }else{
             product.setCategory(null);

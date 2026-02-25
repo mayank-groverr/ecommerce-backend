@@ -1,16 +1,18 @@
 package practice.mayank.ecommerce.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 
 import java.util.HashSet;
 import java.util.Set;
 
-@Data
-@Entity
+@Getter
+@Setter
 @RequiredArgsConstructor
+@Entity
 @Table(name = "categories")
 public class Category {
 
@@ -20,7 +22,7 @@ public class Category {
     @Column(name = "category_id")
     private String categoryId;
 
-    @Column(name = "category_name" , unique = true)
+    @Column(name = "category_name" , unique = true, nullable = true)
     private String categoryName;
 
     @OneToMany(mappedBy = "category")

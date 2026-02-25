@@ -8,16 +8,16 @@ import practice.mayank.ecommerce.entity.Product;
 @Mapper(componentModel = "spring")
 public interface ProductMapper {
 
-    @Mapping(target = "category", source = "categoryDto")
+    @Mapping(target = "category", source = "categoryRequest")
     Product productRequestToProduct(ProductRequest productRequest);
 
     @Mapping(target = "category", ignore = true)
     Product productRequestToProductWithoutCategory(ProductRequest productRequest);
 
-    @Mapping(target = "categoryDto", source = "category")
+    @Mapping(target = "categoryRequest", source = "category")
     ProductRequest productToProductRequest(Product product);
 
-    @Mapping(target = "categoryDto", source = "category")
+    @Mapping(target = "categoryResponse", source = "category")
     ProductResponse productToProductResponse(Product product);
 
     @Mapping(target = "category", ignore = true)

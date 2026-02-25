@@ -1,13 +1,17 @@
 package practice.mayank.ecommerce.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import practice.mayank.ecommerce.dto.CategoryDto;
+import org.springframework.transaction.annotation.Transactional;
+import practice.mayank.ecommerce.dto.category.CategoryRequest;
+import practice.mayank.ecommerce.dto.category.CategoryResponse;
 import practice.mayank.ecommerce.entity.Category;
 import practice.mayank.ecommerce.exception.customexception.ResourceNotFoundException;
-import practice.mayank.ecommerce.mapper.GenericMapper;
+import practice.mayank.ecommerce.mapper.CategoryMapper;
 import practice.mayank.ecommerce.repository.CategoryRepository;
-import java.util.List;
+
 import java.util.Optional;
 
 @Service
@@ -15,49 +19,44 @@ import java.util.Optional;
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
-    private final GenericMapper genericMapper;
+    private final CategoryMapper categoryMapper;
 
-    public CategoryDto createNewCategory(CategoryDto categoryDto) {
-        Category category = genericMapper.categoryDtoToCategory(categoryDto);
+    @Transactional
+    public CategoryResponse createNewCategory(CategoryRequest categoryDto) {
+        Category category = categoryMapper.categoryRequestToCategory(categoryDto);
         Category newCategory = categoryRepository.save(category);
-        return genericMapper.categoryToCategoryDto(newCategory);
+        return categoryMapper.categoryToCategoryResponse(newCategory);
     }
 
-    public List<CategoryDto> getAllCategories() {
-        List<Category> allCategories = categoryRepository.findAll();
-        if (!allCategories.isEmpty()) {
-            return allCategories.stream().map(genericMapper::categoryToCategoryDto).toList();
-        }
-        throw new ResourceNotFoundException("No Categories Found");
+    public Page<CategoryResponse> getAllCategories(int pageNumber, int pageSize) {
+        Page<Category> allCategories = categoryRepository.findAll(PageRequest.of(pageNumber, pageSize));
+        return allCategories.map(categoryMapper::categoryToCategoryResponse);
     }
 
 
-     public Category getCategoryByName(String categoryName) {
+    public Category getCategoryByName(String categoryName) {
         Optional<Category> categoryInDb = categoryRepository.findByCategoryName(categoryName);
-        if (categoryInDb.isPresent()) {
-            return categoryInDb.get();
-        }
-        throw new ResourceNotFoundException("No Category found for this Name: " + categoryName);
+        return categoryInDb.orElseThrow(() -> new ResourceNotFoundException("No category Found for this name: " + categoryName));
     }
 
 
-    public boolean updateCategory(String categoryName, CategoryDto categoryDto) {
+    @Transactional
+    public CategoryResponse updateCategory(String categoryName, CategoryRequest categoryRequest) {
         Category categoryInDb = getCategoryByName(categoryName);
-        int affectedRows = categoryRepository.updateCategoryByName(categoryInDb.getCategoryName(), categoryDto.categoryName());
-        return affectedRows == 1;
+        categoryInDb.setCategoryName(categoryRequest.categoryName());
+        return categoryMapper.categoryToCategoryResponse(categoryInDb);
     }
 
 
-    public boolean deleteCategories(String categoryName) {
-        try {
-            Category categoryByName = getCategoryByName(categoryName);
-            Category nullCategory = getCategoryByName(null);
-            categoryByName.getProducts().forEach(product -> product.setCategory(nullCategory));
-            categoryRepository.deleteByCategoryName(categoryByName.getCategoryName());
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
+    @Transactional
+    public void deleteCategories(String categoryName) {
+        Category categoryByName = getCategoryByName(categoryName);
+        setProductCategoryToNull(categoryByName);
+        categoryRepository.deleteByCategoryName(categoryByName.getCategoryName());
+    }
+
+    public void setProductCategoryToNull(Category category) {
+        category.getProducts().forEach(product -> product.setCategory(null));
     }
 
 }

@@ -1,48 +1,74 @@
 package practice.mayank.ecommerce.controller.admin;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import practice.mayank.ecommerce.dto.CategoryDto;
+import practice.mayank.ecommerce.dto.category.CategoryRequest;
+import practice.mayank.ecommerce.dto.category.CategoryResponse;
 import practice.mayank.ecommerce.service.CategoryService;
-import java.util.List;
 
 @RestController
 @RequestMapping("/admin/category")
 @RequiredArgsConstructor
+@Validated
 public class CategoryController {
 
     private final CategoryService categoryService;
 
 
     @GetMapping("/get-all")
-    public ResponseEntity<List<CategoryDto>> getAllCategories() {
-        List<CategoryDto> allCategories = categoryService.getAllCategories();
-        return new ResponseEntity<>(allCategories, HttpStatus.OK);
+    public ResponseEntity<Page<CategoryResponse>> getAllCategories(
+
+            @RequestParam(name = "pn")
+            @PositiveOrZero(message = "Page number should me more than equal to 0")
+            int pageNumber,
+
+            @RequestParam(name = "ps")
+            @Positive(message  = "Page Size should be greater than 0")
+            @Max(value = 20, message = "Page Size should be less than or equal to 20")
+            int pageSize
+
+    ) {
+        Page<CategoryResponse> allCategories = categoryService.getAllCategories(pageNumber, pageSize);
+        return ResponseEntity.ok(allCategories);
     }
 
     @PostMapping("/create")
-    public ResponseEntity<CategoryDto> createCategory(@RequestBody CategoryDto categoryDto) {
-        CategoryDto newCategory = categoryService.createNewCategory(categoryDto);
+    public ResponseEntity<CategoryResponse> createCategory(@Valid @RequestBody CategoryRequest categoryRequest) {
+        CategoryResponse newCategory = categoryService.createNewCategory(categoryRequest);
         return new ResponseEntity<>(newCategory, HttpStatus.CREATED);
     }
 
-    @PutMapping("/update/name/{categoryName}")
-    public ResponseEntity<CategoryDto> updateCategory(@PathVariable String categoryName, @RequestBody CategoryDto categoryDto) {
-        boolean isUpdated = categoryService.updateCategory(categoryName, categoryDto);
-        if (isUpdated) {
-            return new ResponseEntity<>(HttpStatus.CREATED);
-        }
-        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    @PutMapping("/update/{categoryName}")
+    public ResponseEntity<CategoryResponse> updateCategory(
+
+            @NotBlank(message = "Category name cannot be blank")
+            @PathVariable
+            String categoryName,
+
+            @Valid
+            @RequestBody
+            CategoryRequest categoryDto
+
+    ) {
+        CategoryResponse updatedCategory = categoryService.updateCategory(categoryName, categoryDto);
+        return new ResponseEntity<>(updatedCategory, HttpStatus.CREATED);
     }
 
-    @DeleteMapping("/delete/name/{categoryName}")
-    public ResponseEntity<?> deleteCategory(@PathVariable String categoryName) {
-        if (categoryService.deleteCategories(categoryName)) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    @DeleteMapping("/delete/{categoryName}")
+    public ResponseEntity<Void> deleteCategory(
+
+            @NotBlank(message = "Category name cannot be blank")
+            @PathVariable
+            String categoryName
+    ) {
+        categoryService.deleteCategories(categoryName);
+        return ResponseEntity.noContent().build();
     }
 
 
