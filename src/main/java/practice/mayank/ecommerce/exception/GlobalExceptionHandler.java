@@ -1,79 +1,63 @@
 package practice.mayank.ecommerce.exception;
 
+
 import jakarta.validation.ConstraintViolationException;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.http.*;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import practice.mayank.ecommerce.exception.customexception.InvalidPatchOperationException;
-import practice.mayank.ecommerce.exception.customexception.PageSizeExceededException;
 import practice.mayank.ecommerce.exception.customexception.ResourceNotFoundException;
+import java.util.HashMap;
 
 @RestControllerAdvice
-public class GlobalExceptionHandler {
+public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler
-    public ResponseEntity<ErrorResponse> resourceNotFoundExceptionHandler(ResourceNotFoundException ex){
-        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.NOT_FOUND.value(), ex.getMessage());
-        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    public ResponseEntity<ProblemDetail> handleResourceNotFound(ResourceNotFoundException ex, WebRequest request) {
+        ProblemDetail problemDetail = ErrorResponseUtil.of(ex.getMessage(), "Resource not found", HttpStatus.NOT_FOUND, request);
+        return new ResponseEntity<>(problemDetail, HttpStatus.NOT_FOUND);
+    }
+
+
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(
+            MethodArgumentNotValidException ex,
+            HttpHeaders headers, HttpStatusCode status, WebRequest request
+    ) {
+
+        HashMap<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getFieldErrors().forEach(
+                fieldError -> errors.put(fieldError.getField(), fieldError.getDefaultMessage())
+        );
+
+        ProblemDetail problemDetail = ErrorResponseUtil.of("Validation Failed", HttpStatus.BAD_REQUEST, request);
+        ErrorResponseUtil.addField(problemDetail, "errors", errors);
+        return ResponseEntity.badRequest().body(problemDetail);
+    }
+
+
+    @ExceptionHandler
+    protected ResponseEntity<Object> handleConstraintViolation(
+            ConstraintViolationException ex,
+            WebRequest request
+    ) {
+
+        HashMap<String, String> errors = new HashMap<>();
+        ex.getConstraintViolations().forEach(
+                constraintViolation -> errors.put(constraintViolation.getPropertyPath().toString(),
+                        constraintViolation.getMessage()));
+
+        ProblemDetail problemDetail = ErrorResponseUtil.of("Validation Failed", HttpStatus.BAD_REQUEST, request);
+        ErrorResponseUtil.addField(problemDetail, "errors", errors);
+        return ResponseEntity.badRequest().body(problemDetail);
     }
 
     @ExceptionHandler
-    public ResponseEntity<ErrorResponse> methodArgumentNotValidExceptionHandler(MethodArgumentNotValidException ex){
-        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler
-    public ResponseEntity<ErrorResponse> constraintViolationExceptionHandler(ConstraintViolationException ex){
-        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler
-    public ResponseEntity<ErrorResponse> noHandlerFoundExceptionHandler(NoHandlerFoundException ex){
-        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler
-    public ResponseEntity<ErrorResponse> missingServletRequestParameterExceptionHandler(MissingServletRequestParameterException ex){
-        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler
-    public ResponseEntity<ErrorResponse> methodArgumentTypeMismatchExceptionHandler(MethodArgumentTypeMismatchException ex){
-        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler
-    public ResponseEntity<ErrorResponse> pageSizeExceededExceptionHandler(PageSizeExceededException ex){
-        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler
-    public ResponseEntity<ErrorResponse> httpMessageNotReadableExceptionHandler(HttpMessageNotReadableException ex){
-        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler
-    public ResponseEntity<ErrorResponse> illegalArgumentExceptionHandler(IllegalArgumentException ex){
-        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler
-    public ResponseEntity<ErrorResponse> invalidPatchOperationExceptionHandler(InvalidPatchOperationException ex){
-        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    public ResponseEntity<ProblemDetail> handleInvalidPatchOperation(InvalidPatchOperationException ex, WebRequest request) {
+        ProblemDetail problemDetail = ErrorResponseUtil.of(ex.getMessage(), "Update Failed", HttpStatus.BAD_REQUEST, request);
+        return ResponseEntity.badRequest().body(problemDetail);
     }
 }
