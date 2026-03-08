@@ -1,5 +1,6 @@
 package practice.mayank.ecommerce.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,11 +19,12 @@ public class Cart {
     @Column(name = "cart_id")
     private String cartId;
 
+    @JsonBackReference
     @OneToOne
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToMany(mappedBy = "cart", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "cart", fetch = FetchType.LAZY)
     private Set<CartItem> cartItems = new HashSet<>();
 
 

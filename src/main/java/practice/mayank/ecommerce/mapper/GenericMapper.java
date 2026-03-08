@@ -6,6 +6,8 @@ import org.mapstruct.Mapping;
 import practice.mayank.ecommerce.dto.*;
 import practice.mayank.ecommerce.dto.category.CategoryRequest;
 import practice.mayank.ecommerce.dto.product.ProductResponse;
+import practice.mayank.ecommerce.dto.user.UserRequest;
+import practice.mayank.ecommerce.dto.user.UserResponse;
 import practice.mayank.ecommerce.entity.*;
 
 

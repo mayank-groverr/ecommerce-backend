@@ -1,13 +1,17 @@
 package practice.mayank.ecommerce.controller.user;
 
+import com.github.fge.jsonpatch.JsonPatch;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import practice.mayank.ecommerce.dto.UserRequest;
-import practice.mayank.ecommerce.dto.UserResponse;
+import practice.mayank.ecommerce.dto.user.PasswordUpdateRequest;
+import practice.mayank.ecommerce.dto.user.UserResponse;
+import practice.mayank.ecommerce.entity.User;
 import practice.mayank.ecommerce.service.UserService;
 
 
@@ -21,31 +25,32 @@ public class UserController {
 
     @GetMapping("/get")
     public ResponseEntity<UserResponse> getDetail() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        UserResponse user = userService.getUser(auth.getName()); // Authenticated user email
-        if (user != null) {
-            return new ResponseEntity<>(user, HttpStatus.OK);
-        }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        User authenticatedUser = userService.getPrincipalInstanceOfUser();
+        UserResponse user = userService.getUser(authenticatedUser.getUserEmail()); // Authenticated user email
+        return ResponseEntity.ok(user);
     }
 
-    @PutMapping("/update")
-    public ResponseEntity<UserResponse> updateUser(@RequestBody UserRequest userRequest) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        UserResponse updatedUser = userService.updateUser(auth.getName(), userRequest);
-        if (updatedUser != null) {
-            return new ResponseEntity<>(updatedUser, HttpStatus.OK);
-        }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    @PatchMapping(value = "/update", consumes = "application/json-patch+json")
+    public ResponseEntity<UserResponse> updateUser(@RequestBody JsonPatch jsonPatch) {
+        User authenticatedUser = userService.getPrincipalInstanceOfUser();
+        UserResponse updatedUser = userService.updateUser(authenticatedUser.getUserEmail(), jsonPatch);
+        return ResponseEntity.ok(updatedUser);
+    }
+
+    @PatchMapping("/update-password")
+    public ResponseEntity<String> updateUserPassword(@Valid @RequestBody PasswordUpdateRequest passwordUpdateRequest){
+        User authenticatedUser = userService.getPrincipalInstanceOfUser();
+        userService.updateUserPassword(authenticatedUser.getUserEmail(), passwordUpdateRequest);
+        return new ResponseEntity<>("Password Updated Successfully", HttpStatus.OK);
     }
 
     @DeleteMapping("/delete")
     public ResponseEntity<HttpStatus> deleteUser() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (userService.deleteUser(auth.getName())) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        User authenticatedUser = userService.getPrincipalInstanceOfUser();
+        userService.deleteUser(authenticatedUser.getUserEmail());
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+
 
 }

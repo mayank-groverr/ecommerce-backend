@@ -4,9 +4,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import practice.mayank.ecommerce.entity.Role;
+import practice.mayank.ecommerce.entity.User;
+import practice.mayank.ecommerce.exception.customexception.ResourceNotFoundException;
 import practice.mayank.ecommerce.repository.RoleRepository;
 
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -14,13 +18,24 @@ import java.util.Optional;
 public class RoleService {
     private final RoleRepository roleRepository;
 
-    public Role makeUser() {
-        Optional<Role> userRole = roleRepository.findByRoleName("ROLE_USER");
-        return userRole.orElse(null);
+    public void assignRole(String roleName, User user) {
+        Role role = getRole(roleName);
+        user.getRoles().add(role);
     }
 
-    public Role makeAdmin() {
-        Optional<Role> userRole = roleRepository.findByRoleName("ROLE_ADMIN");
-        return userRole.orElse(null);
+    public void assignRole(User user, String... roleNames) {
+        Set<Role> rolesInDB = new HashSet<>();
+        for (String roleName : roleNames) {
+            Role role = getRole(roleName);
+            rolesInDB.add(role);
+        }
+        user.getRoles().addAll(rolesInDB);
     }
+
+    private Role getRole(String roleName){
+        Optional<Role> role = roleRepository.findByRoleName(roleName);
+        return role.orElseThrow(() -> new ResourceNotFoundException("No such role found" + roleName));
+    }
+
+
 }

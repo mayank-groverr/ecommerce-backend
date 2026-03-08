@@ -1,16 +1,20 @@
 package practice.mayank.ecommerce.service;
 
+import com.github.fge.jsonpatch.JsonPatch;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import practice.mayank.ecommerce.dto.LoginRequest;
-import practice.mayank.ecommerce.dto.UserRequest;
-import practice.mayank.ecommerce.dto.UserResponse;
+import org.springframework.transaction.annotation.Transactional;
+import practice.mayank.ecommerce.dto.user.*;
 import practice.mayank.ecommerce.entity.User;
-import practice.mayank.ecommerce.mapper.GenericMapper;
+import practice.mayank.ecommerce.exception.customexception.ResourceNotFoundException;
+import practice.mayank.ecommerce.mapper.UserMapper;
 import practice.mayank.ecommerce.repository.UserRepository;
+import practice.mayank.ecommerce.util.PatchUtil;
+import practice.mayank.ecommerce.validation.handler.CustomValidationHandler;
 import java.util.Optional;
 
 
@@ -19,59 +23,61 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final GenericMapper genericMapper;
+    private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final RoleService roleService;
     private final CartService cartService;
+    private final CustomValidationHandler validator;
 
     public UserResponse getUser(String email) {
         User userInDb = findUserByEmail(email);
-        return genericMapper.userToUserResponse(userInDb);
+        return userMapper.userToUserResponse(userInDb);
     }
 
+    @Transactional
     public UserResponse createNewUser(UserRequest userRequest) {
-        User user = genericMapper.userRequestToUser(userRequest);
-        user.getRoles().add(roleService.makeUser());
+        User user = userMapper.userRequestToUser(userRequest);
+        roleService.assignRole("ROLE_USER", user);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         User newUser = userRepository.save(user);
-        cartService.createNewCart(user);
-        return genericMapper.userToUserResponse(newUser);
+        cartService.createNewCart(newUser);
+        return userMapper.userToUserResponse(newUser);
     }
 
+    @Transactional
     public UserResponse createNewAdmin(UserRequest userRequest) {
-        User user = genericMapper.userRequestToUser(userRequest);
-        user.getRoles().add(roleService.makeUser());
-        user.getRoles().add(roleService.makeAdmin());
+        User user = userMapper.userRequestToUser(userRequest);
+        roleService.assignRole(user, "ROLE_USER", "ROLE_ADMIN");
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         User newUser = userRepository.save(user);
-        cartService.createNewCart(user);
-        return genericMapper.userToUserResponse(newUser);
+        cartService.createNewCart(newUser);
+        return userMapper.userToUserResponse(newUser);
     }
 
-    public UserResponse updateUser(String email, UserRequest userRequest) {
-        User user = genericMapper.userRequestToUser(userRequest);
-        User userInDb = findUserByEmail(email);
-        if (userInDb != null) {
-            userInDb.setName((user.getName() != null && !user.getName().isEmpty()) ? user.getName() : userInDb.getName());
-            userInDb.setMobileNumber((user.getMobileNumber() != null && !user.getMobileNumber().isEmpty()) ? user.getMobileNumber() : userInDb.getMobileNumber());
-            if (user.getPassword() != null && !user.getPassword().isEmpty()) {
-                userInDb.setPassword(passwordEncoder.encode(user.getPassword()));
-            }
-            userRepository.save(userInDb);
-            return genericMapper.userToUserResponse(userInDb);
-        }
+    @Transactional
+    public UserResponse updateUser(String email, JsonPatch jsonPatch) {
+        User userByEmail = findUserByEmail(email);
+        UserUpdateRequest updateRequest = userMapper.userToUserRequestWithoutPassword(userByEmail);
 
-        return null;
+        UserUpdateRequest requestAfterChanges =
+                PatchUtil.applyJsonPatch(jsonPatch, updateRequest, UserUpdateRequest.class);
+
+        validator.validate(requestAfterChanges);
+        userMapper.updateExistingUser(requestAfterChanges, userByEmail);
+        return userMapper.userToUserResponse(userByEmail);
     }
 
-    public boolean deleteUser(String email) {
-        User user = findUserByEmail(email);
-        if (user != null) {
-            userRepository.delete(user);
-            return true;
-        }
-        return false;
+    @Transactional
+    public void updateUserPassword(String email, PasswordUpdateRequest passwordUpdateRequest){
+        User userByEmail = findUserByEmail(email);
+        userByEmail.setPassword(passwordEncoder.encode(passwordUpdateRequest.password()));
+    }
+
+    @Transactional
+    public void deleteUser(String email) {
+        User userByEmail = findUserByEmail(email);
+        userRepository.delete(userByEmail);
     }
 
     public User authenticate(LoginRequest loginRequest) {
@@ -81,12 +87,15 @@ public class UserService {
                         loginRequest.password()));
 
         return findUserByEmail(loginRequest.userEmail());
-
     }
 
     private User findUserByEmail(String email) {
         Optional<User> byEmail = userRepository.findByUserEmail(email);
-        return byEmail.orElse(null);
+        return byEmail.orElseThrow(() -> new ResourceNotFoundException("No user found:" + email));
+    }
+
+    public User getPrincipalInstanceOfUser(){
+        return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 
 }
