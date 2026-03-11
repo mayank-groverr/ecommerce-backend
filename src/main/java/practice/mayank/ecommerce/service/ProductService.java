@@ -9,13 +9,16 @@ import org.springframework.transaction.annotation.Transactional;
 import practice.mayank.ecommerce.dto.product.ProductRequest;
 import practice.mayank.ecommerce.dto.product.ProductResponse;
 import practice.mayank.ecommerce.entity.Category;
+import practice.mayank.ecommerce.entity.OrderItem;
 import practice.mayank.ecommerce.entity.Product;
 import practice.mayank.ecommerce.exception.customexception.ResourceNotFoundException;
 import practice.mayank.ecommerce.mapper.ProductMapper;
 import practice.mayank.ecommerce.repository.ProductRepository;
 import practice.mayank.ecommerce.util.PatchUtil;
 import practice.mayank.ecommerce.validation.handler.CustomValidationHandler;
+
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -73,7 +76,7 @@ public class ProductService {
         productRepository.delete(productById);
     }
 
-    private Product findProductById(String productId) {
+    public Product findProductById(String productId) {
         Optional<Product> product = productRepository.findById(productId);
         return product.orElseThrow(() -> new  ResourceNotFoundException("No product found for productId: " + productId));
     }
@@ -92,5 +95,14 @@ public class ProductService {
             product.setCategory(null);
         }
     }
+
+    @Transactional
+    public void decreaseQuantity(Set<OrderItem> orderItems){
+        orderItems.forEach(orderItem -> {
+            Product productOrdered = orderItem.getProductOrdered();
+            productOrdered.setProductStock(productOrdered.getProductStock() - orderItem.getOrderedQuantity());
+        });
+    }
+
 
 }

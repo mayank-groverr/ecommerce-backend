@@ -1,82 +1,64 @@
 package practice.mayank.ecommerce.service;
 
-import jakarta.persistence.SecondaryTable;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import practice.mayank.ecommerce.dto.CartDto;
-import practice.mayank.ecommerce.dto.CartItemDto;
+import org.springframework.transaction.annotation.Transactional;
+import practice.mayank.ecommerce.dto.cart.CartItemRemoveRequest;
+import practice.mayank.ecommerce.dto.cart.CartResponse;
+import practice.mayank.ecommerce.dto.cart.cartitem.CartItemRequest;
+import practice.mayank.ecommerce.dto.cart.cartitem.CartItemResponse;
 import practice.mayank.ecommerce.entity.Cart;
-import practice.mayank.ecommerce.entity.CartItem;
 import practice.mayank.ecommerce.entity.User;
-import practice.mayank.ecommerce.mapper.GenericMapper;
+import practice.mayank.ecommerce.mapper.CartMapper;
 import practice.mayank.ecommerce.repository.CartRepository;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
-@Slf4j
+
 @Service
 @RequiredArgsConstructor
 public class CartService {
 
     private final CartRepository cartRepository;
-    private final GenericMapper genericMapper;
     private final CartItemService cartItemService;
+    private final CartMapper cartMapper;
 
 
-    public void createNewCart(User user){
+
+    @Transactional
+    public void createNewCart(User user) {
         Cart cart = new Cart();
         cart.setUser(user);
         cartRepository.save(cart);
     }
 
-    public CartDto getCart(User user){
+
+    public CartResponse getCart(User user) {
+        Set<CartItemResponse> itemsInCart = cartItemService.getCartItem(user.getCart());
+        return new CartResponse(itemsInCart);
+    }
+
+
+    public CartResponse addToCart(User user, CartItemRequest cartItemRequest) {
         Cart cart = user.getCart();
-        HashSet<CartItemDto> cartItemDtos = new HashSet<>();
-        for (CartItem cartItem : cart.getCartItems()) {
-            cartItemDtos.add(genericMapper.cartItemToCartItemDto(cartItem));
-        }
-        return new CartDto(cartItemDtos);
+        cartItemService.saveCartItem(cartItemRequest, cart);
+        Set<CartItemResponse> itemsInCart = cartItemService.getCartItem(cart);
+        return new CartResponse(itemsInCart);
     }
 
 
-    public boolean addToCart(User user, CartItemDto cartItemDto){
-        try{
-            Cart cart = user.getCart();
-            cartItemService.saveCartItem(cartItemDto,cart);
-            return true;
-        }catch (Exception ex){
-            log.error(ex.getMessage());
-            return false;
-        }
+    public CartResponse removeFromCart(User user, CartItemRemoveRequest cartItemRemoveRequest) {
+        Cart cart = user.getCart();
+        cartItemService.removeCartItem(cart, cartItemRemoveRequest);
+        Set<CartItemResponse> itemsInCart = cartItemService.getCartItem(cart);
+        return new CartResponse(itemsInCart);
     }
 
-
-    public boolean removeFromCart(User user, CartItemDto cartItemDto){
-        try{
-            Cart cart = user.getCart();
-            cartItemService.removeCartItem(cart, cartItemDto.productId());
-            return true;
-        } catch (Exception ex) {
-            log.error(ex.getMessage());
-            return false;
-        }
+    public CartResponse updateCart(User user, CartItemRequest cartItemRequest) {
+        Cart cart = user.getCart();
+        cartItemService.updateCartItem(cart, cartItemRequest);
+        Set<CartItemResponse> itemsInCart = cartItemService.getCartItem(cart);
+        return new CartResponse(itemsInCart);
     }
-
-    public boolean updateCart(User user, CartItemDto cartItemDto){
-        try{
-            cartItemService.updateCartItem(user.getCart(), cartItemDto);
-            return true;
-        }catch (Exception ex){
-            log.error(ex.getMessage());
-            return false;
-        }
-    }
-
-
 
 
 }

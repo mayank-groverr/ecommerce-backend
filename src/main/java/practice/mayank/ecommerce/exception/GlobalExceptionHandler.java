@@ -9,7 +9,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import practice.mayank.ecommerce.exception.customexception.InvalidPatchOperationException;
+import practice.mayank.ecommerce.exception.customexception.QuantityViolationException;
 import practice.mayank.ecommerce.exception.customexception.ResourceNotFoundException;
+
 import java.util.HashMap;
 
 @RestControllerAdvice
@@ -34,7 +36,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         );
 
         ProblemDetail problemDetail = ErrorResponseUtil.of("Validation Failed", HttpStatus.BAD_REQUEST, request);
-        ErrorResponseUtil.addField(problemDetail, "errors", errors);
+        problemDetail.setProperty("errors", errors);
         return ResponseEntity.badRequest().body(problemDetail);
     }
 
@@ -51,7 +53,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                         constraintViolation.getMessage()));
 
         ProblemDetail problemDetail = ErrorResponseUtil.of("Validation Failed", HttpStatus.BAD_REQUEST, request);
-        ErrorResponseUtil.addField(problemDetail, "errors", errors);
+        problemDetail.setProperty("errors", errors);
         return ResponseEntity.badRequest().body(problemDetail);
     }
 
@@ -59,5 +61,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<ProblemDetail> handleInvalidPatchOperation(InvalidPatchOperationException ex, WebRequest request) {
         ProblemDetail problemDetail = ErrorResponseUtil.of(ex.getMessage(), "Update Failed", HttpStatus.BAD_REQUEST, request);
         return ResponseEntity.badRequest().body(problemDetail);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ProblemDetail> handleQuantityViolationException(QuantityViolationException ex, WebRequest request) {
+        ProblemDetail orderCannotBeServed = ErrorResponseUtil.of("Order cannot be served", HttpStatus.BAD_REQUEST, request);
+        orderCannotBeServed.setProperty("errors",ex.getQuantityViolations());
+        return ResponseEntity.badRequest().body(orderCannotBeServed);
     }
 }

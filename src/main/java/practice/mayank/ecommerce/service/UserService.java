@@ -89,12 +89,12 @@ public class UserService {
         return findUserByEmail(loginRequest.userEmail());
     }
 
-    private User findUserByEmail(String email) {
+    public User findUserByEmail(String email) {
         Optional<User> byEmail = userRepository.findByUserEmail(email);
         return byEmail.orElseThrow(() -> new ResourceNotFoundException("No user found:" + email));
     }
 
-    public User getPrincipalInstanceOfUser(){
+    public static User getAuthenticatedUser(){
         return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 
