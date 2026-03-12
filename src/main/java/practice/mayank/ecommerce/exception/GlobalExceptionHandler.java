@@ -1,6 +1,7 @@
 package practice.mayank.ecommerce.exception;
 
 
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.*;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -12,6 +13,7 @@ import practice.mayank.ecommerce.exception.customexception.InvalidPatchOperation
 import practice.mayank.ecommerce.exception.customexception.QuantityViolationException;
 import practice.mayank.ecommerce.exception.customexception.ResourceNotFoundException;
 
+import java.security.SignatureException;
 import java.util.HashMap;
 
 @RestControllerAdvice
@@ -68,5 +70,26 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         ProblemDetail orderCannotBeServed = ErrorResponseUtil.of("Order cannot be served", HttpStatus.BAD_REQUEST, request);
         orderCannotBeServed.setProperty("errors",ex.getQuantityViolations());
         return ResponseEntity.badRequest().body(orderCannotBeServed);
+    }
+
+    public ResponseEntity<ProblemDetail> handleSignatureException(SignatureException ex,  WebRequest request){
+        ProblemDetail jwtSignatureFailed = ErrorResponseUtil.of(
+                "Jwt signature failed", HttpStatus.BAD_REQUEST, request);
+
+        return ResponseEntity.badRequest().body(jwtSignatureFailed);
+    }
+
+    public ResponseEntity<ProblemDetail> handleExpiredJwtException(ExpiredJwtException ex, WebRequest request){
+        ProblemDetail jwtSignatureFailed = ErrorResponseUtil.of(
+                "Jwt token expired. Kindly visit /public/refresh to renew", HttpStatus.BAD_REQUEST, request);
+
+        return ResponseEntity.badRequest().body(jwtSignatureFailed);
+    }
+
+    public ResponseEntity<ProblemDetail> handleIllegalArgumentException(IllegalArgumentException ex,  WebRequest request){
+        ProblemDetail jwtSignatureFailed = ErrorResponseUtil.of(
+                ex.getMessage(), HttpStatus.BAD_REQUEST, request);
+
+        return ResponseEntity.badRequest().body(jwtSignatureFailed);
     }
 }

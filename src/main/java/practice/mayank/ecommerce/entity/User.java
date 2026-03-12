@@ -91,4 +91,8 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return this.isEnabled;
     }
+
+    public String getEmail() {
+        return null;
+    }
 }
