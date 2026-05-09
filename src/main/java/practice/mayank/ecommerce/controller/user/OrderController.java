@@ -11,10 +11,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import practice.mayank.ecommerce.dto.order.OrderResponse;
 import practice.mayank.ecommerce.entity.User;
-import practice.mayank.ecommerce.service.OrderItemService;
 import practice.mayank.ecommerce.service.OrderService;
 import practice.mayank.ecommerce.service.UserService;
-import java.util.Set;
 
 @RestController
 @RequestMapping("/user/orders")
@@ -55,7 +53,7 @@ public class OrderController {
         return new ResponseEntity<>(orderResponse, HttpStatus.CREATED);
     }
 
-    @PostMapping("/cancel-order")
+    @PatchMapping("/cancel-order")
     public ResponseEntity<?> cancelOrder(@RequestParam(name = "id") String orderId){
         User user = UserService.getAuthenticatedUser();
         orderService.cancelOrder(user, orderId);

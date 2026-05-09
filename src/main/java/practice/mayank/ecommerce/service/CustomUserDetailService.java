@@ -7,7 +7,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import practice.mayank.ecommerce.entity.User;
 import practice.mayank.ecommerce.repository.UserRepository;
-
 import java.util.Optional;
 
 

@@ -16,12 +16,12 @@ public class SecurityTokenService {
 
     private final JwtService jwtService;
     private final RefreshTokenService refreshTokenService;
-    private final CookieService cookieService;
+    private final RefreshTokenCookieService cookieService;
 
 
     @Transactional
     public SecurityTokenResponse generateSecurityToken(User user, HttpServletResponse response){
-        String accessToken = jwtService.generateToken(user.getEmail());
+        String accessToken = jwtService.generateToken(user.getUsername());
         String refreshToken = refreshTokenService.createRefreshToken(user);
         cookieService.attachRefreshTokenToCookie(response, refreshToken, refreshTokenService.getRefreshTokenExpiryTime());
         return new SecurityTokenResponse(accessToken, jwtService.extractExpiration(accessToken));
@@ -42,7 +42,7 @@ public class SecurityTokenService {
         String refreshTokenFromRequest = cookieService.readRefreshTokenFromRequest(request);
         RefreshToken refreshToken = refreshTokenService.findRefreshToken(refreshTokenFromRequest);
         String renewedRefreshToken = refreshTokenService.renewRefreshToken(refreshToken);
-        String renewedJwtToken = jwtService.generateToken(refreshToken.getUser().getEmail());
+        String renewedJwtToken = jwtService.generateToken(refreshToken.getUser().getUsername());
         cookieService.attachRefreshTokenToCookie(response, renewedRefreshToken, refreshTokenService.getRefreshTokenExpiryTime());
         return new SecurityTokenResponse(renewedJwtToken, jwtService.extractExpiration(renewedJwtToken));
     }

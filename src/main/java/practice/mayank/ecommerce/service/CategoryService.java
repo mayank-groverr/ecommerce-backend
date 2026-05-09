@@ -11,7 +11,6 @@ import practice.mayank.ecommerce.entity.Category;
 import practice.mayank.ecommerce.exception.customexception.ResourceNotFoundException;
 import practice.mayank.ecommerce.mapper.CategoryMapper;
 import practice.mayank.ecommerce.repository.CategoryRepository;
-
 import java.util.Optional;
 
 @Service
@@ -55,7 +54,7 @@ public class CategoryService {
         categoryRepository.deleteByCategoryName(categoryByName.getCategoryName());
     }
 
-    public void setProductCategoryToNull(Category category) {
+    private void setProductCategoryToNull(Category category) {
         category.getProducts().forEach(product -> product.setCategory(null));
     }
 

@@ -16,9 +16,11 @@ public class OrderItem {
     private String orderItemId;
 
     @ManyToOne
+    @JoinColumn(name = "order_id")
     private Order order;
 
     @ManyToOne
+    @JoinColumn(name = "product_ordered")
     private Product productOrdered;
 
     private Integer orderedQuantity;

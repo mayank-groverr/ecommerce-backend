@@ -1,4 +1,4 @@
-package practice.mayank.ecommerce.dto.cart;
+package practice.mayank.ecommerce.dto.cart.cartitem;
 
 import jakarta.validation.constraints.NotBlank;
 

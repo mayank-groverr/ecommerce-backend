@@ -3,7 +3,7 @@ package practice.mayank.ecommerce.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import practice.mayank.ecommerce.dto.cart.CartItemRemoveRequest;
+import practice.mayank.ecommerce.dto.cart.cartitem.CartItemRemoveRequest;
 import practice.mayank.ecommerce.dto.cart.cartitem.CartItemRequest;
 import practice.mayank.ecommerce.dto.cart.cartitem.CartItemResponse;
 import practice.mayank.ecommerce.entity.Cart;
@@ -12,9 +12,7 @@ import practice.mayank.ecommerce.entity.Product;
 import practice.mayank.ecommerce.exception.customexception.CartEmptyException;
 import practice.mayank.ecommerce.exception.customexception.ResourceNotFoundException;
 import practice.mayank.ecommerce.mapper.CartItemMapper;
-import practice.mayank.ecommerce.mapper.ProductMapper;
 import practice.mayank.ecommerce.repository.CartItemRepository;
-
 import java.util.Set;
 
 
@@ -25,7 +23,6 @@ public class CartItemService {
     private final CartItemMapper cartItemMapper;
     private final CartItemRepository cartItemRepository;
     private final ProductService productService;
-    private final ProductMapper productMapper;
 
 
     public Set<CartItemResponse> getCartItem(Cart cart) {
@@ -62,7 +59,7 @@ public class CartItemService {
         Set<CartItem> itemsInCart = findItemsInCart(cart);
         if (!itemsInCart.isEmpty()) {
             CartItem itemToBeDeleted = findCartItemByProductId(itemsInCart, productById.getProductId());
-            cartItemRepository.delete(itemToBeDeleted);
+            cartItemDelete(itemToBeDeleted);
             return;
         }
         throw new CartEmptyException("No item in cart");
@@ -77,9 +74,9 @@ public class CartItemService {
         updateCartItemQuantity(itemToBeUpdated, productById, cartItemRequest.quantity());
     }
 
-    private void updateCartItemQuantity(CartItem itemToBeUpdated, Product product ,int quantity) {
+    private void updateCartItemQuantity(CartItem itemToBeUpdated, Product product, int quantity) {
         if (quantity == 0) {
-            cartItemRepository.delete(itemToBeUpdated);
+            cartItemDelete(itemToBeUpdated);
             return;
         }
         itemToBeUpdated.setQuantity(quantity);
@@ -97,5 +94,9 @@ public class CartItemService {
 
     public Set<CartItem> findItemsInCart(Cart cart) {
         return cartItemRepository.findByCart(cart);
+    }
+
+    public void cartItemDelete(CartItem cartItem){
+        cartItemRepository.delete(cartItem);
     }
 }

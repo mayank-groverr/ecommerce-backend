@@ -1,23 +1,29 @@
 package practice.mayank.ecommerce.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.filter.OncePerRequestFilter;
+import practice.mayank.ecommerce.exception.ErrorResponseUtil;
 import practice.mayank.ecommerce.service.CustomUserDetailService;
-
-
 import java.io.IOException;
 import java.util.Collection;
 
@@ -27,9 +33,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final CustomUserDetailService userDetailService;
+    private final ObjectMapper objectMapper;
 
-    // Request with Credentials -> Allow -> Verify -> Set SecurityContextHolder
-    // Request without Credentials -> Deny
     @Override
     protected void doFilterInternal(
            @NonNull HttpServletRequest request,
@@ -48,22 +53,54 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             
         String token = authorization.substring(7);
+        Claims claim;
 
-        if(!jwtService.isTokenValid(token)){
-            filterChain.doFilter(request,response);
+        try{
+            //Extracting Claims
+            claim = jwtService.extractAllClaims(token);
+        }catch(ExpiredJwtException | MalformedJwtException | SignatureException ex) {
+
+
+            ProblemDetail problemDetail = ErrorResponseUtil.of(
+                    ex.getMessage(),
+                    "Jwt Verification Failed",
+                    HttpStatus.UNAUTHORIZED,
+                    new ServletWebRequest(request, response)
+            );
+
+            // Writing Failure Response
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            response.setContentType("application/json");
+            response.getWriter().write(objectMapper.writeValueAsString(problemDetail));
             return;
         }
 
-        //Extracting Claims
-        Claims claim = jwtService.extractAllClaims(token);
+
+
         String email = claim.getSubject();
+        UserDetails userDetails;
 
-        UserDetails userDetails = userDetailService.loadUserByUsername(email);
+        try{
+            userDetails = userDetailService.loadUserByUsername(email);
+        } catch (UsernameNotFoundException ex) {
+
+            ProblemDetail problemDetail = ErrorResponseUtil.of(
+                    ex.getMessage(),
+                    "User Not Found",
+                    HttpStatus.NOT_FOUND,
+                    new ServletWebRequest(request, response)
+            );
+
+            // Writing Failure Response
+            response.setStatus(HttpStatus.NOT_FOUND.value());
+            response.setContentType("application/json");
+            response.getWriter().write(objectMapper.writeValueAsString(problemDetail));
+            return;
+        }
+
         Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
-
         Authentication auth = new UsernamePasswordAuthenticationToken(userDetails,null,authorities);
         SecurityContextHolder.getContext().setAuthentication(auth);
-
         filterChain.doFilter(request,response);
 
     }

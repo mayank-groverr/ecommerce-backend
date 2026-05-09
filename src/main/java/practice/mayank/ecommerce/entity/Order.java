@@ -17,6 +17,7 @@ public class Order {
     private String orderId;
 
     @ManyToOne
+    @JoinColumn(name = "user_id")
     private User user;
 
     private Date orderPlacedAt;
@@ -26,6 +27,6 @@ public class Order {
     @Enumerated(value = EnumType.STRING)
     private OrderStatus orderStatus;
 
-    @OneToMany
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private Set<OrderItem> orderedItems;
 }

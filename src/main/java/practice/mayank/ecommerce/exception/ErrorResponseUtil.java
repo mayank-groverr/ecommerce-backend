@@ -3,7 +3,6 @@ package practice.mayank.ecommerce.exception;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.context.request.WebRequest;
@@ -11,7 +10,6 @@ import org.springframework.web.context.request.WebRequest;
 import java.net.URI;
 
 
-@Slf4j
 @Getter
 @Setter
 public class ErrorResponseUtil{

@@ -1,7 +1,6 @@
 package practice.mayank.ecommerce.exception;
 
 
-import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.*;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -9,11 +8,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-import practice.mayank.ecommerce.exception.customexception.InvalidPatchOperationException;
-import practice.mayank.ecommerce.exception.customexception.QuantityViolationException;
-import practice.mayank.ecommerce.exception.customexception.ResourceNotFoundException;
+import practice.mayank.ecommerce.exception.customexception.*;
 
-import java.security.SignatureException;
 import java.util.HashMap;
 
 @RestControllerAdvice
@@ -67,29 +63,32 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler
     public ResponseEntity<ProblemDetail> handleQuantityViolationException(QuantityViolationException ex, WebRequest request) {
-        ProblemDetail orderCannotBeServed = ErrorResponseUtil.of("Order cannot be served", HttpStatus.BAD_REQUEST, request);
-        orderCannotBeServed.setProperty("errors",ex.getQuantityViolations());
-        return ResponseEntity.badRequest().body(orderCannotBeServed);
+        ProblemDetail problemDetail = ErrorResponseUtil.of("Order cannot be served", HttpStatus.BAD_REQUEST, request);
+        problemDetail.setProperty("errors",ex.getQuantityViolations());
+        return ResponseEntity.badRequest().body(problemDetail);
     }
 
-    public ResponseEntity<ProblemDetail> handleSignatureException(SignatureException ex,  WebRequest request){
-        ProblemDetail jwtSignatureFailed = ErrorResponseUtil.of(
-                "Jwt signature failed", HttpStatus.BAD_REQUEST, request);
-
-        return ResponseEntity.badRequest().body(jwtSignatureFailed);
-    }
-
-    public ResponseEntity<ProblemDetail> handleExpiredJwtException(ExpiredJwtException ex, WebRequest request){
-        ProblemDetail jwtSignatureFailed = ErrorResponseUtil.of(
-                "Jwt token expired. Kindly visit /public/refresh to renew", HttpStatus.BAD_REQUEST, request);
-
-        return ResponseEntity.badRequest().body(jwtSignatureFailed);
-    }
-
+    @ExceptionHandler
     public ResponseEntity<ProblemDetail> handleIllegalArgumentException(IllegalArgumentException ex,  WebRequest request){
-        ProblemDetail jwtSignatureFailed = ErrorResponseUtil.of(
+        ProblemDetail problemDetail = ErrorResponseUtil.of(
                 ex.getMessage(), HttpStatus.BAD_REQUEST, request);
 
-        return ResponseEntity.badRequest().body(jwtSignatureFailed);
+        return ResponseEntity.badRequest().body(problemDetail);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ProblemDetail> handleCartEmptyException(CartEmptyException ex, WebRequest request){
+        ProblemDetail problemDetail = ErrorResponseUtil.of(
+                ex.getMessage(), HttpStatus.BAD_REQUEST, request);
+
+        return ResponseEntity.badRequest().body(problemDetail);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ProblemDetail> handleAlreadyCancelledException(AlreadyCancelledException ex, WebRequest request){
+        ProblemDetail problemDetail = ErrorResponseUtil.of(
+                ex.getMessage(), HttpStatus.BAD_REQUEST, request);
+
+        return ResponseEntity.badRequest().body(problemDetail);
     }
 }

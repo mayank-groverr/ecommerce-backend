@@ -18,11 +18,13 @@ import java.util.Set;
 public class RoleService {
     private final RoleRepository roleRepository;
 
-    public void assignRole(String roleName, User user) {
+    /** Assigning single role to a user */
+    public void assignRole(User user, String roleName) {
         Role role = getRole(roleName);
         user.getRoles().add(role);
     }
 
+    /** Assigning multiple roles to a user */
     public void assignRole(User user, String... roleNames) {
         Set<Role> rolesInDB = new HashSet<>();
         for (String roleName : roleNames) {

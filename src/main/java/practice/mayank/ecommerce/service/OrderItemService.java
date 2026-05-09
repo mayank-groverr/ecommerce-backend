@@ -9,7 +9,6 @@ import practice.mayank.ecommerce.exception.customexception.QuantityViolationExce
 import practice.mayank.ecommerce.exception.model.QuantityViolation;
 import practice.mayank.ecommerce.mapper.OrderItemMapper;
 import practice.mayank.ecommerce.repository.OrderItemRepository;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -39,6 +38,7 @@ public class OrderItemService {
                     OrderItem orderItem = orderItemMapper.cartItemToOrderItem(cartItem);
                     orderItem.setOrder(order);
                     unOrderedItems.add(orderItem);
+                    cartItemService.cartItemDelete(cartItem);
                 }
 
             });
@@ -72,7 +72,7 @@ public class OrderItemService {
                     new QuantityViolation(
                             product,
                             product.getProductStock(),
-                            0,
+                            orderedQuantity,
                             "Product not in stock"
                     );
             return quantityViolation;

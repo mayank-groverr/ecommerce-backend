@@ -12,7 +12,6 @@ import practice.mayank.ecommerce.dto.user.LoginRequest;
 import practice.mayank.ecommerce.dto.user.UserRequest;
 import practice.mayank.ecommerce.dto.user.UserResponse;
 import practice.mayank.ecommerce.entity.User;
-import practice.mayank.ecommerce.security.JwtService;
 import practice.mayank.ecommerce.security.SecurityTokenService;
 import practice.mayank.ecommerce.service.UserService;
 
@@ -35,7 +34,7 @@ public class PublicController {
             @Valid
             @RequestBody UserRequest userRequest
     ) {
-        UserResponse newUser = userService.createNewUser(userRequest);
+        UserResponse newUser = userService.createBuyerAccount(userRequest);
         return new ResponseEntity<>(newUser, HttpStatus.CREATED);
     }
 

@@ -16,11 +16,17 @@ import java.util.Set;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/admin/order")
+@RequestMapping("/admin/orders")
 @Validated
 public class OrderManagementController {
 
     private final OrderService orderService;
+
+    @GetMapping("/get/{id}")
+    public ResponseEntity<OrderResponse> getAllPlacedOrders(@PathVariable String id) {
+        OrderResponse ordersById = orderService.getOrdersById(id);
+        return ResponseEntity.ok(ordersById);
+    }
 
     @GetMapping("/get-all")
     public ResponseEntity<Page<OrderResponse>> getAllPlacedOrders(
@@ -57,7 +63,7 @@ public class OrderManagementController {
         return ResponseEntity.ok(ordersByStatus);
     }
 
-    @PostMapping("/update-status")
+    @PatchMapping("/update-status")
     public ResponseEntity<OrderResponse> updateOrderStatus(
             @RequestBody OrderStatusRequest orderStatusRequest,
             @RequestParam(name = "id") String orderId

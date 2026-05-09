@@ -4,6 +4,7 @@ import com.github.fge.jsonpatch.JsonPatch;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -36,23 +37,25 @@ public class UserService {
     }
 
     @Transactional
-    public UserResponse createNewUser(UserRequest userRequest) {
-        User user = userMapper.userRequestToUser(userRequest);
-        roleService.assignRole("ROLE_USER", user);
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        User newUser = userRepository.save(user);
-        cartService.createNewCart(newUser);
+    public UserResponse createBuyerAccount(UserRequest userRequest) {
+        User newUser = createNewUser(userRequest);
+        roleService.assignRole(newUser,"ROLE_USER");
         return userMapper.userToUserResponse(newUser);
     }
 
     @Transactional
-    public UserResponse createNewAdmin(UserRequest userRequest) {
+    public UserResponse createAdminAccount(UserRequest userRequest) {
+        User newAdmin = createNewUser(userRequest);
+        roleService.assignRole(newAdmin, "ROLE_USER","ROLE_ADMIN");
+        return userMapper.userToUserResponse(newAdmin);
+    }
+
+    private User createNewUser(UserRequest userRequest){
         User user = userMapper.userRequestToUser(userRequest);
-        roleService.assignRole(user, "ROLE_USER", "ROLE_ADMIN");
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         User newUser = userRepository.save(user);
         cartService.createNewCart(newUser);
-        return userMapper.userToUserResponse(newUser);
+        return newUser;
     }
 
     @Transactional
@@ -81,12 +84,12 @@ public class UserService {
     }
 
     public User authenticate(LoginRequest loginRequest) {
-        authenticationManager.authenticate(
+        Authentication authenticateUser = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginRequest.userEmail(),
                         loginRequest.password()));
 
-        return findUserByEmail(loginRequest.userEmail());
+        return (User) authenticateUser.getPrincipal();
     }
 
     public User findUserByEmail(String email) {

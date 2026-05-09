@@ -11,12 +11,11 @@ import practice.mayank.ecommerce.entity.Order;
 import practice.mayank.ecommerce.entity.OrderItem;
 import practice.mayank.ecommerce.entity.OrderStatus;
 import practice.mayank.ecommerce.entity.User;
+import practice.mayank.ecommerce.exception.customexception.AlreadyCancelledException;
 import practice.mayank.ecommerce.exception.customexception.NoOrdersFoundException;
 import practice.mayank.ecommerce.exception.customexception.ResourceNotFoundException;
 import practice.mayank.ecommerce.mapper.OrderMapper;
 import practice.mayank.ecommerce.repository.OrderRepository;
-
-
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -41,6 +40,11 @@ public class OrderService {
             return orderMapper.orderToOrderResponse(order);
         }
         throw new NoOrdersFoundException("No orders yet");
+    }
+
+    public OrderResponse getOrdersById(String orderId) {
+        Order orderById = findOrderById(orderId);
+        return orderMapper.orderToOrderResponse(orderById);
     }
 
 
@@ -68,8 +72,8 @@ public class OrderService {
         unplacedOrder.setOrderPlacedAt(new Date());
         Order placedOrder = orderRepository.save(unplacedOrder);
         Set<OrderItem> itemsOrdered = orderItemService.createOrderItem(user.getCart(), placedOrder);
-        unplacedOrder.setTotalPrice(orderItemService.getTotalPriceOfOrderItems(itemsOrdered));
-        unplacedOrder.setOrderedItems(itemsOrdered);
+        placedOrder.setOrderedItems(itemsOrdered);
+        placedOrder.setTotalPrice(orderItemService.getTotalPriceOfOrderItems(itemsOrdered));
         return orderMapper.orderToOrderResponse(placedOrder);
     }
 
@@ -81,6 +85,10 @@ public class OrderService {
             throw new IllegalArgumentException("You cannot mark a order as cancelled");
         }
         Order orderById = findOrderById(orderId);
+        if (orderById.getOrderStatus() == OrderStatus.CANCELLED){
+            throw new AlreadyCancelledException("Order cancelled by user");
+        }
+
         orderById.setOrderStatus(orderStatus);
 
         return orderMapper.orderToOrderResponse(orderById);
@@ -90,7 +98,9 @@ public class OrderService {
     public void cancelOrder(User user, String orderId) {
         Set<Order> userOrders = orderRepository.findByUser(user);
         Order order = searchOrderById(userOrders, orderId);
-        order.setOrderStatus(OrderStatus.CANCELLED);
+        if(order.getOrderStatus() == OrderStatus.CANCELLED){
+            throw new AlreadyCancelledException("Order already cancelled");
+        }
     }
 
     private Order searchOrderById(Set<Order> orders, String orderId) {

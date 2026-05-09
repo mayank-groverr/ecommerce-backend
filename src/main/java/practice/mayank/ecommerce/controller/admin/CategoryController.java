@@ -47,7 +47,6 @@ public class CategoryController {
     @PutMapping("/update/{categoryName}")
     public ResponseEntity<CategoryResponse> updateCategory(
 
-            @NotBlank(message = "Category name cannot be blank")
             @PathVariable
             String categoryName,
 
