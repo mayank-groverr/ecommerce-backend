@@ -13,6 +13,7 @@ import practice.mayank.ecommerce.exception.customexception.CartEmptyException;
 import practice.mayank.ecommerce.exception.customexception.ResourceNotFoundException;
 import practice.mayank.ecommerce.mapper.CartItemMapper;
 import practice.mayank.ecommerce.repository.CartItemRepository;
+
 import java.util.Set;
 
 
@@ -37,17 +38,15 @@ public class CartItemService {
         Set<CartItem> itemsInCart = findItemsInCart(cart);
 
 
-            try {
-                CartItem itemToBeUpdated = findCartItemByProductId(itemsInCart, productById.getProductId());
-                updateCartItemQuantity(itemToBeUpdated, productById, cartItemRequest.quantity());
-            } catch (ResourceNotFoundException e) {
-                cartItem.setCart(cart);
-                cartItem.setProduct(productById);
-                cartItem.setTotalPrice(productById.getProductPrice() * cartItemRequest.quantity());
-                cartItemRepository.save(cartItem);
-            }
-
-
+        try {
+            CartItem itemToBeUpdated = findCartItemInCartByProductId(itemsInCart, productById.getProductId());
+            updateCartItemQuantity(itemToBeUpdated, productById, cartItemRequest.quantity());
+        } catch (ResourceNotFoundException e) {
+            cartItem.setCart(cart);
+            cartItem.setProduct(productById);
+            cartItem.setTotalPrice(productById.getProductPrice() * cartItemRequest.quantity());
+            cartItemRepository.save(cartItem);
+        }
 
 
     }
@@ -58,7 +57,7 @@ public class CartItemService {
         Product productById = productService.findProductById(cartItemRemoveRequest.productId());
         Set<CartItem> itemsInCart = findItemsInCart(cart);
         if (!itemsInCart.isEmpty()) {
-            CartItem itemToBeDeleted = findCartItemByProductId(itemsInCart, productById.getProductId());
+            CartItem itemToBeDeleted = findCartItemInCartByProductId(itemsInCart, productById.getProductId());
             cartItemDelete(itemToBeDeleted);
             return;
         }
@@ -70,7 +69,7 @@ public class CartItemService {
     public void updateCartItem(Cart cart, CartItemRequest cartItemRequest) {
         Product productById = productService.findProductById(cartItemRequest.productId());
         Set<CartItem> itemsInCart = findItemsInCart(cart);
-        CartItem itemToBeUpdated = findCartItemByProductId(itemsInCart, productById.getProductId());
+        CartItem itemToBeUpdated = findCartItemInCartByProductId(itemsInCart, productById.getProductId());
         updateCartItemQuantity(itemToBeUpdated, productById, cartItemRequest.quantity());
     }
 
@@ -80,10 +79,10 @@ public class CartItemService {
             return;
         }
         itemToBeUpdated.setQuantity(quantity);
-        itemToBeUpdated.setTotalPrice(quantity  * product.getProductPrice());
+        itemToBeUpdated.setTotalPrice(quantity * product.getProductPrice());
     }
 
-    private CartItem findCartItemByProductId(Set<CartItem> cartItems, String productId) {
+    private CartItem findCartItemInCartByProductId(Set<CartItem> cartItems, String productId) {
         for (CartItem cartItem : cartItems) {
             if (cartItem.getProduct().getProductId().equals(productId)) {
                 return cartItem;
@@ -96,7 +95,7 @@ public class CartItemService {
         return cartItemRepository.findByCart(cart);
     }
 
-    public void cartItemDelete(CartItem cartItem){
+    public void cartItemDelete(CartItem cartItem) {
         cartItemRepository.delete(cartItem);
     }
 }
