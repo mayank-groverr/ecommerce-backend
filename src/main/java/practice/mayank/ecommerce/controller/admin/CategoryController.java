@@ -56,13 +56,11 @@ public class CategoryController {
 
     ) {
         CategoryResponse updatedCategory = categoryService.updateCategory(categoryName, categoryDto);
-        return new ResponseEntity<>(updatedCategory, HttpStatus.CREATED);
+        return ResponseEntity.ok(updatedCategory);
     }
 
     @DeleteMapping("/delete/{categoryName}")
     public ResponseEntity<Void> deleteCategory(
-
-            @NotBlank(message = "Category name cannot be blank")
             @PathVariable
             String categoryName
     ) {
