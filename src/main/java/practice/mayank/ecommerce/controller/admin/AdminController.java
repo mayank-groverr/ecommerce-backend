@@ -10,6 +10,7 @@ import practice.mayank.ecommerce.dto.user.PasswordUpdateRequest;
 import practice.mayank.ecommerce.dto.user.UserRequest;
 import practice.mayank.ecommerce.dto.user.UserResponse;
 import practice.mayank.ecommerce.entity.User;
+import practice.mayank.ecommerce.mapper.UserMapper;
 import practice.mayank.ecommerce.service.UserService;
 
 
@@ -20,6 +21,7 @@ public class AdminController {
 
 
     private final UserService userService;
+    private final UserMapper userMapper;
 
     @PostMapping("/create")
     public ResponseEntity<UserResponse> createNewAdmin(
@@ -32,7 +34,7 @@ public class AdminController {
     @GetMapping("/get")
     public ResponseEntity<UserResponse> getDetail() {
         User authenticatedUser = UserService.getAuthenticatedUser();
-        UserResponse user = userService.getUser(authenticatedUser.getUserEmail()); // Authenticated user email
+        UserResponse user = userMapper.userToUserResponse(authenticatedUser);
         return ResponseEntity.ok(user);
     }
 
@@ -54,7 +56,7 @@ public class AdminController {
     public ResponseEntity<HttpStatus> deleteUser() {
         User authenticatedUser = UserService.getAuthenticatedUser();
         userService.deleteUser(authenticatedUser.getUserEmail());
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.noContent().build();
     }
 
 }
