@@ -55,8 +55,8 @@ public class OrderController {
 
     @PatchMapping("/cancel-order")
     public ResponseEntity<?> cancelOrder(@RequestParam(name = "id") String orderId){
-        User user = UserService.getAuthenticatedUser();
-        orderService.cancelOrder(user, orderId);
+        User authenticatedUser = UserService.getAuthenticatedUser();
+        orderService.cancelOrder(authenticatedUser, orderId);
         return ResponseEntity.noContent().build();
     }
 
