@@ -14,15 +14,15 @@ public class CustomValidationHandler {
 
     public <T> void validate(T valueToBeValidated, Class<?>... groups) {
         Set<ConstraintViolation<T>> violations = validator.validate(valueToBeValidated, groups);
-        ifEmptyThrowException(violations);
+        ifNotEmptyThrowException(violations);
     }
 
     public <T> void validate(T valueToBeValidated) {
         Set<ConstraintViolation<T>> violations = validator.validate(valueToBeValidated);
-        ifEmptyThrowException(violations);
+        ifNotEmptyThrowException(violations);
     }
 
-    public <T> void ifEmptyThrowException(Set<ConstraintViolation<T>> violations) {
+    public <T> void ifNotEmptyThrowException(Set<ConstraintViolation<T>> violations) {
         if (!violations.isEmpty()) {
             throw new ConstraintViolationException(violations);
         }
