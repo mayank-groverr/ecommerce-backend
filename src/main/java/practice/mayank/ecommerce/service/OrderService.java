@@ -39,7 +39,7 @@ public class OrderService {
             Order order = searchOrderById(placedOrders, orderId);
             return orderMapper.orderToOrderResponse(order);
         }
-        throw new NoOrdersFoundException("No orders yet");
+        throw new NoOrdersFoundException("No orders found with this orderID: " + orderId);
     }
 
     public OrderResponse getOrdersById(String orderId) {
@@ -58,9 +58,9 @@ public class OrderService {
         return allPlacedOrder.map(orderMapper::orderToOrderResponse);
     }
 
-    public Set<OrderResponse> getOrdersByStatus(OrderStatus orderStatus, int pageNumber, int pageSize) {
-        List<Order> orderByStatus = findOrderByStatus(orderStatus, pageNumber, pageSize);
-        return orderByStatus.stream().map(orderMapper::orderToOrderResponse).collect(Collectors.toSet());
+    public Page<OrderResponse> getOrdersByStatus(OrderStatus orderStatus, int pageNumber, int pageSize) {
+        Page<Order> orderByStatus = findOrderByStatus(orderStatus, pageNumber, pageSize);
+        return orderByStatus.map(orderMapper::orderToOrderResponse);
     }
 
 
@@ -101,6 +101,7 @@ public class OrderService {
         if(order.getOrderStatus() == OrderStatus.CANCELLED){
             throw new AlreadyCancelledException("Order already cancelled");
         }
+        order.setOrderStatus(OrderStatus.CANCELLED);
     }
 
     private Order searchOrderById(Set<Order> orders, String orderId) {
@@ -112,7 +113,7 @@ public class OrderService {
         throw new ResourceNotFoundException("No order found with id:" + orderId);
     }
 
-    private List<Order> findOrderByStatus(OrderStatus orderStatus, int pageNumber, int pageSize) {
+    private Page<Order> findOrderByStatus(OrderStatus orderStatus, int pageNumber, int pageSize) {
         return orderRepository.findByOrderStatus(orderStatus, PageRequest.of(pageNumber, pageSize));
     }
 

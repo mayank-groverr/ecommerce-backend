@@ -23,7 +23,7 @@ public class OrderManagementController {
     private final OrderService orderService;
 
     @GetMapping("/get/{id}")
-    public ResponseEntity<OrderResponse> getAllPlacedOrders(@PathVariable String id) {
+    public ResponseEntity<OrderResponse> getPlacedOrderById(@PathVariable String id) {
         OrderResponse ordersById = orderService.getOrdersById(id);
         return ResponseEntity.ok(ordersById);
     }
@@ -46,7 +46,7 @@ public class OrderManagementController {
     }
 
     @GetMapping("/get-all-by-status")
-    public ResponseEntity<Set<OrderResponse>> getOrdersByStatus(
+    public ResponseEntity<Page<OrderResponse>> getOrdersByStatus(
             @RequestParam(name = "os")
             OrderStatus orderStatus,
 
@@ -59,7 +59,7 @@ public class OrderManagementController {
             @Max(20)
             int pageSize
     ) {
-        Set<OrderResponse> ordersByStatus = orderService.getOrdersByStatus(orderStatus, pageNumber, pageSize);
+        Page<OrderResponse> ordersByStatus = orderService.getOrdersByStatus(orderStatus, pageNumber, pageSize);
         return ResponseEntity.ok(ordersByStatus);
     }
 
