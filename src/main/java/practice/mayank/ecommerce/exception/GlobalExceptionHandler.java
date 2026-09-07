@@ -64,12 +64,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler
     public ResponseEntity<ProblemDetail> handleQuantityViolationException(QuantityViolationException ex, WebRequest request) {
         ProblemDetail problemDetail = ErrorResponseUtil.of("Order cannot be served", HttpStatus.BAD_REQUEST, request);
-        problemDetail.setProperty("errors",ex.getQuantityViolations());
+        problemDetail.setProperty("errors", ex.getQuantityViolations());
         return ResponseEntity.badRequest().body(problemDetail);
     }
 
     @ExceptionHandler
-    public ResponseEntity<ProblemDetail> handleIllegalArgumentException(IllegalArgumentException ex,  WebRequest request){
+    public ResponseEntity<ProblemDetail> handleIllegalArgumentException(IllegalArgumentException ex, WebRequest request) {
         ProblemDetail problemDetail = ErrorResponseUtil.of(
                 ex.getMessage(), HttpStatus.BAD_REQUEST, request);
 
@@ -77,7 +77,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler
-    public ResponseEntity<ProblemDetail> handleCartEmptyException(CartEmptyException ex, WebRequest request){
+    public ResponseEntity<ProblemDetail> handleCartEmptyException(CartEmptyException ex, WebRequest request) {
         ProblemDetail problemDetail = ErrorResponseUtil.of(
                 ex.getMessage(), HttpStatus.BAD_REQUEST, request);
 
@@ -85,7 +85,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler
-    public ResponseEntity<ProblemDetail> handleAlreadyCancelledException(AlreadyCancelledException ex, WebRequest request){
+    public ResponseEntity<ProblemDetail> handleAlreadyCancelledException(AlreadyCancelledException ex, WebRequest request) {
         ProblemDetail problemDetail = ErrorResponseUtil.of(
                 ex.getMessage(), HttpStatus.BAD_REQUEST, request);
 

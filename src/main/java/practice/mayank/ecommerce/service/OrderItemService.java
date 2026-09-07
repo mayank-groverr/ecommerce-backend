@@ -8,6 +8,7 @@ import practice.mayank.ecommerce.exception.customexception.CartEmptyException;
 import practice.mayank.ecommerce.exception.customexception.QuantityViolationException;
 import practice.mayank.ecommerce.exception.model.QuantityViolation;
 import practice.mayank.ecommerce.mapper.OrderItemMapper;
+import practice.mayank.ecommerce.mapper.ProductMapper;
 import practice.mayank.ecommerce.repository.OrderItemRepository;
 import java.util.HashSet;
 import java.util.List;
@@ -20,6 +21,7 @@ public class OrderItemService {
     private final OrderItemRepository orderItemRepository;
     private final OrderItemMapper orderItemMapper;
     private final CartItemService cartItemService;
+    private final ProductMapper productMapper;
 
     @Transactional
     public Set<OrderItem> createOrderItem(Cart cart, Order order){
@@ -70,7 +72,7 @@ public class OrderItemService {
         if(productStock == 0) {
             quantityViolation =
                     new QuantityViolation(
-                            product,
+                            productMapper.productToProductResponse(product),
                             product.getProductStock(),
                             orderedQuantity,
                             "Product not in stock"
@@ -79,10 +81,10 @@ public class OrderItemService {
         }else if(orderedQuantity > productStock){
             quantityViolation =
                     new QuantityViolation(
-                                    product,
+                                    productMapper.productToProductResponse(product),
                                     product.getProductStock(),
                                     orderedQuantity,
-                                    String.format("Product not available in such quantity: %d available quantity: %d",
+                                    String.format("Insufficient stock. Requested quantity is unavailable; only %d units are available.",
                                             orderedQuantity, productStock)
                     );
             return quantityViolation;
