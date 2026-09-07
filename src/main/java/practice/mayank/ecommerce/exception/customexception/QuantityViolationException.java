@@ -15,6 +15,7 @@ public class QuantityViolationException extends RuntimeException {
     private Set<QuantityViolation> quantityViolations;
 
     public QuantityViolationException(Set<QuantityViolation> quantityViolations){
+        super("Products Quantity Violated");
         this.quantityViolations = quantityViolations;
     }
 
