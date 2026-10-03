@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import practice.mayank.ecommerce.dto.security.SecurityTokenResponse;
 import practice.mayank.ecommerce.dto.user.LoginRequest;
-import practice.mayank.ecommerce.dto.user.UserRequest;
+import practice.mayank.ecommerce.dto.user.CreateUserRequest;
 import practice.mayank.ecommerce.dto.user.UserResponse;
 import practice.mayank.ecommerce.entity.User;
 import practice.mayank.ecommerce.security.SecurityTokenService;
@@ -32,7 +32,7 @@ public class PublicController {
     @PostMapping("/signup")
     public ResponseEntity<UserResponse> signup(
             @Valid
-            @RequestBody UserRequest userRequest
+            @RequestBody CreateUserRequest userRequest
     ) {
         UserResponse newUser = userService.createBuyerAccount(userRequest);
         return new ResponseEntity<>(newUser, HttpStatus.CREATED);
