@@ -24,7 +24,7 @@ public record ProductRequest(
         @NotNull(message = "Stock is required")
         Integer productStock,
 
-        @NotBlank(message = "Image url cannot be Blank")
+
         String imageUrl,
 
         @Valid

@@ -3,8 +3,10 @@ package practice.mayank.ecommerce.dto.user;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import practice.mayank.ecommerce.security.entity.PermissionEnum;
+import java.util.List;
 
-public record UserRequest(
+public record CreateAdminRequest(
         @NotBlank(message = "Name cannot be blank")
         @Pattern(regexp = "^[a-zA-Z]+(?:\\s[a-zA-Z]+)*$", message = "Name must contain only letters and may include single spaces between words.")
         String name,
@@ -22,7 +24,9 @@ public record UserRequest(
                 Password must be 8-16 characters long and include at least one uppercase letter,
                 one lowercase letter, one number, and one special character (#?!@$%^&*-), and must not contain spaces."""
         )
-        String password
+        String password,
+
+        List<PermissionEnum> permissionsList
 ) {
 
 
