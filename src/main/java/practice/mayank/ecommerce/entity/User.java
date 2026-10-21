@@ -1,6 +1,6 @@
 package practice.mayank.ecommerce.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -8,9 +8,11 @@ import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import practice.mayank.ecommerce.security.entity.Permission;
+import practice.mayank.ecommerce.security.entity.RefreshToken;
+import practice.mayank.ecommerce.security.entity.Role;
+
+import java.util.*;
 
 @Getter
 @Setter
@@ -38,14 +40,20 @@ public class User implements UserDetails {
     @Column(name = "is_enabled")
     private boolean isEnabled = true;
 
+    private String createdByEmail;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "user_roles",
+    @ManyToOne
+    @JoinColumn(name = "role_id")
+    private Role role;
+
+
+    @ManyToMany(fetch =  FetchType.EAGER)
+    @JoinTable(
+            name = "users_permission",
             joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
+            inverseJoinColumns = @JoinColumn(name = "permission_id")
     )
-    private Set<Role> roles = new HashSet<>();
-
+    private Set<Permission> permissions = new HashSet<>();
 
     @JsonManagedReference
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
@@ -57,41 +65,36 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
     private Set<RefreshToken> refreshToken;
 
-    @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return roles.stream()
-                .map(role -> new SimpleGrantedAuthority(role.getRoleName())).toList();
+
+        List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority(role.getRoleName().getRoleNameWithRolePrefix()));
+        authorities.addAll(
+                permissions.stream().map(
+                        permission -> new SimpleGrantedAuthority(permission.getPermissionName().name())
+                ).toList()
+        );
+        return authorities;
     }
 
-    @JsonIgnore
     @Override
     public String getUsername() {
         return userEmail;
     }
 
-    @JsonIgnore
     @Override
     public boolean isAccountNonExpired() {
         return true;
     }
 
-    @JsonIgnore
     @Override
     public boolean isAccountNonLocked() {
         return true;
     }
 
-    @JsonIgnore
     @Override
     public boolean isCredentialsNonExpired() {
         return true;
     }
-
-    @JsonIgnore
-    @Override
-    public boolean isEnabled() {
-        return this.isEnabled;
-    }
-
 }
