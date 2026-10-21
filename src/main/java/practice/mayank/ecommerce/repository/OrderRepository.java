@@ -6,9 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import practice.mayank.ecommerce.entity.Order;
 import practice.mayank.ecommerce.entity.OrderStatus;
 import practice.mayank.ecommerce.entity.User;
-import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 public interface OrderRepository extends JpaRepository<Order, String> {
 
@@ -16,7 +14,7 @@ public interface OrderRepository extends JpaRepository<Order, String> {
 
     Page<Order> findByOrderStatus(OrderStatus orderStatus, Pageable pageable);
 
-    Set<Order> findByUser(User user);
+    Optional<Order> findByUserAndOrderId(User user, String orderId);
 
     Page<Order> findByUser(User user, Pageable pageable);
 }
