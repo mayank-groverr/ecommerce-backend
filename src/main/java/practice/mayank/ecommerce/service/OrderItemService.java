@@ -84,8 +84,8 @@ public class OrderItemService {
                                     productMapper.productToProductResponse(product),
                                     product.getProductStock(),
                                     orderedQuantity,
-                                    String.format("Insufficient stock. Requested quantity is unavailable; only %d units are available.",
-                                            orderedQuantity, productStock)
+                                    String.format("Insufficient stock. Requested quantity is unavailable. Only %d units are available.",
+                                            productStock)
                     );
             return quantityViolation;
         }
