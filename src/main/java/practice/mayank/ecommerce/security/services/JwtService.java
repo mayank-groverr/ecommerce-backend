@@ -1,12 +1,15 @@
-package practice.mayank.ecommerce.security;
+package practice.mayank.ecommerce.security.services;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import practice.mayank.ecommerce.entity.User;
+
 import javax.crypto.SecretKey;
 import java.util.Date;
+
 
 
 @Service
@@ -28,13 +31,14 @@ public class JwtService {
         this.jwtExpiryTime = jwtExpiryTime;
     }
 
-    public String generateToken(String email) {
+    public String generateToken(User user) {
         return Jwts
                 .builder()
                 .header()
                 .type("Access Token")
                 .and()
-                .subject(email)
+                .subject(user.getUserEmail())
+                .claim("role"   , user.getRole().getRoleName().getRoleNameWithRolePrefix())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + jwtExpiryTime))
                 .signWith(secretKey)

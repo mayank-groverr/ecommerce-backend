@@ -1,15 +1,15 @@
-package practice.mayank.ecommerce.security;
+package practice.mayank.ecommerce.security.services;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import practice.mayank.ecommerce.entity.RefreshToken;
 import practice.mayank.ecommerce.entity.User;
 import practice.mayank.ecommerce.exception.customexception.ResourceNotFoundException;
-import practice.mayank.ecommerce.exception.customexception.TokenExpiredException;
-import practice.mayank.ecommerce.repository.RefreshTokenRepository;
+import practice.mayank.ecommerce.security.exceptions.TokenExpiredException;
+import practice.mayank.ecommerce.security.entity.RefreshToken;
+import practice.mayank.ecommerce.security.repository.RefreshTokenRepository;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;

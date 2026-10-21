@@ -16,16 +16,18 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.filter.OncePerRequestFilter;
 import practice.mayank.ecommerce.exception.ErrorResponseUtil;
+import practice.mayank.ecommerce.security.services.JwtService;
 import practice.mayank.ecommerce.service.CustomUserDetailService;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -75,31 +77,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-
-
         String email = claim.getSubject();
-        UserDetails userDetails;
+        String role = claim.get("role", String.class);
 
-        try{
-            userDetails = userDetailService.loadUserByUsername(email);
-        } catch (UsernameNotFoundException ex) {
+        Authentication auth = new UsernamePasswordAuthenticationToken(
+                email,
+                null,
+                List.of(new SimpleGrantedAuthority(role))
+        );
 
-            ProblemDetail problemDetail = ErrorResponseUtil.of(
-                    ex.getMessage(),
-                    "User Not Found",
-                    HttpStatus.NOT_FOUND,
-                    new ServletWebRequest(request, response)
-            );
-
-            // Writing Failure Response
-            response.setStatus(HttpStatus.NOT_FOUND.value());
-            response.setContentType("application/json");
-            response.getWriter().write(objectMapper.writeValueAsString(problemDetail));
-            return;
-        }
-
-        Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
-        Authentication auth = new UsernamePasswordAuthenticationToken(userDetails,null,authorities);
         SecurityContextHolder.getContext().setAuthentication(auth);
         filterChain.doFilter(request,response);
 

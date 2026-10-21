@@ -1,4 +1,4 @@
-package practice.mayank.ecommerce.security;
+package practice.mayank.ecommerce.security.services;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
-import practice.mayank.ecommerce.exception.customexception.BadRequestException;
+import practice.mayank.ecommerce.security.exceptions.RefreshTokenMissingException;
 import java.time.Duration;
 
 @Service
@@ -32,7 +32,7 @@ public class RefreshTokenCookieService {
         ResponseCookie.ResponseCookieBuilder responseCookieBuilder = ResponseCookie.from(cookieName, refreshToken)
                 .httpOnly(true)
                 .secure(false)
-                .path("/ecommerce-app/public")
+                .path("*")
                 .maxAge(Duration.ofMinutes(maxAge))
                 .sameSite(cookieSameSite);
 
@@ -50,7 +50,7 @@ public class RefreshTokenCookieService {
                 httpOnly(true).
                 secure(false).
                 maxAge(0)
-                .path("/ecommerce-app/public").
+                .path("*").
                 sameSite(cookieSameSite);
 
         if(cookieDomain != null && !cookieDomain.isBlank()){
@@ -68,6 +68,6 @@ public class RefreshTokenCookieService {
                 }
             }
         }
-        throw new BadRequestException("Refresh token Missing");
+        throw new RefreshTokenMissingException("Refresh token Missing");
     }
 }
