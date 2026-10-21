@@ -20,36 +20,28 @@ public class UserController {
 
 
     private final UserService userService;
-    private final UserMapper userMapper;
 
     @GetMapping("/get")
     public ResponseEntity<UserResponse> getDetail() {
-        User authenticatedUser = UserService.getAuthenticatedUser();
-        UserResponse user = userMapper.userToUserResponse(authenticatedUser); // User directly from context email
+        UserResponse user = userService.getUser();
         return ResponseEntity.ok(user);
     }
 
     @PatchMapping(value = "/update", consumes = "application/json-patch+json")
     public ResponseEntity<UserResponse> updateUser(@RequestBody JsonPatch jsonPatch) {
-        User authenticatedUser = UserService.getAuthenticatedUser();
-        UserResponse updatedUser = userService.updateUser(authenticatedUser.getUserEmail(), jsonPatch);
+        UserResponse updatedUser = userService.updateUser(jsonPatch);
         return ResponseEntity.ok(updatedUser);
     }
 
     @PatchMapping("/update-password")
     public ResponseEntity<String> updateUserPassword(@Valid @RequestBody PasswordUpdateRequest passwordUpdateRequest){
-        User authenticatedUser = UserService.getAuthenticatedUser();
-        userService.updateUserPassword(authenticatedUser.getUserEmail(), passwordUpdateRequest);
+        userService.updateUserPassword(passwordUpdateRequest);
         return new ResponseEntity<>("Password Updated Successfully", HttpStatus.OK);
     }
 
     @DeleteMapping("/delete")
     public ResponseEntity<HttpStatus> deleteUser() {
-        User authenticatedUser = UserService.getAuthenticatedUser();
-        userService.deleteUser(authenticatedUser.getUserEmail());
+        userService.deleteUser();
         return ResponseEntity.noContent().build();
     }
-
-
-
 }

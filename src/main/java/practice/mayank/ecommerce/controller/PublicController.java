@@ -7,12 +7,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import practice.mayank.ecommerce.dto.security.SecurityTokenResponse;
 import practice.mayank.ecommerce.dto.user.LoginRequest;
 import practice.mayank.ecommerce.dto.user.CreateUserRequest;
 import practice.mayank.ecommerce.dto.user.UserResponse;
 import practice.mayank.ecommerce.entity.User;
-import practice.mayank.ecommerce.security.SecurityTokenService;
+import practice.mayank.ecommerce.security.dto.SecurityTokenResponse;
+import practice.mayank.ecommerce.security.services.SecurityTokenService;
 import practice.mayank.ecommerce.service.UserService;
 
 

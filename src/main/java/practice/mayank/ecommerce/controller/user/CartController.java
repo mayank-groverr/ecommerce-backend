@@ -24,8 +24,7 @@ public class CartController {
 
     @GetMapping("/get")
     public ResponseEntity<CartResponse> getCart(){
-        User authenticatedUser = UserService.getAuthenticatedUser();
-        CartResponse cartResponse = cartService.getCart(authenticatedUser);
+        CartResponse cartResponse = cartService.getCart();
         return ResponseEntity.ok(cartResponse);
     }
 
@@ -33,15 +32,13 @@ public class CartController {
     public ResponseEntity<CartResponse> addToCart(
             @Validated(OnCreate.class) @RequestBody CartItemRequest cartItemRequest
     ){
-        User authenticatedUser = UserService.getAuthenticatedUser();
-        CartResponse cartResponse = cartService.addToCart(authenticatedUser, cartItemRequest);
+        CartResponse cartResponse = cartService.addToCart(cartItemRequest);
         return ResponseEntity.ok(cartResponse);
     }
 
     @DeleteMapping("/remove-from-cart")
     public ResponseEntity<CartResponse> removeFromCart(@Valid @RequestBody CartItemRemoveRequest cartItemRemoveRequest){
-        User authenticatedUser = UserService.getAuthenticatedUser();
-        CartResponse cartResponse = cartService.removeFromCart(authenticatedUser, cartItemRemoveRequest);
+        CartResponse cartResponse = cartService.removeFromCart(cartItemRemoveRequest);
         return ResponseEntity.ok(cartResponse);
     }
 
@@ -49,8 +46,7 @@ public class CartController {
     public ResponseEntity<CartResponse> updateCart(
             @Validated(OnUpdate.class) @RequestBody CartItemRequest cartItemRequest
     ){
-        User authenticatedUser = UserService.getAuthenticatedUser();
-        CartResponse cartResponse = cartService.updateCart(authenticatedUser, cartItemRequest);
+        CartResponse cartResponse = cartService.updateCart(cartItemRequest);
         return ResponseEntity.ok(cartResponse);
     }
 }

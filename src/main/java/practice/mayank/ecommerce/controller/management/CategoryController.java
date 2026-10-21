@@ -1,4 +1,4 @@
-package practice.mayank.ecommerce.controller.admin;
+package practice.mayank.ecommerce.controller.management;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
@@ -13,7 +13,7 @@ import practice.mayank.ecommerce.dto.category.CategoryResponse;
 import practice.mayank.ecommerce.service.CategoryService;
 
 @RestController
-@RequestMapping("/admin/category")
+@RequestMapping("/management-workspace/category")
 @RequiredArgsConstructor
 @Validated
 public class CategoryController {

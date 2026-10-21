@@ -1,4 +1,4 @@
-package practice.mayank.ecommerce.controller.admin;
+package practice.mayank.ecommerce.controller.management;
 
 import com.github.fge.jsonpatch.JsonPatch;
 import jakarta.validation.constraints.Max;
@@ -12,11 +12,14 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import practice.mayank.ecommerce.dto.product.ProductRequest;
 import practice.mayank.ecommerce.dto.product.ProductResponse;
+import practice.mayank.ecommerce.security.entity.PermissionEnum;
+import practice.mayank.ecommerce.security.services.PermissionService;
 import practice.mayank.ecommerce.service.ProductService;
+import practice.mayank.ecommerce.service.UserService;
 
 
 @RestController
-@RequestMapping("/admin/product")
+@RequestMapping("/management-workspace/product")
 @RequiredArgsConstructor
 @Validated
 public class ProductController {
@@ -25,6 +28,7 @@ public class ProductController {
 
     @GetMapping("/get/{productId}")
     public ResponseEntity<ProductResponse> getProductById(@PathVariable String productId) {
+
         ProductResponse productById = productService.getProductById(productId);
         return ResponseEntity.ok(productById);
     }

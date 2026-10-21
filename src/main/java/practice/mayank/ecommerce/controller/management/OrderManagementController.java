@@ -1,4 +1,4 @@
-package practice.mayank.ecommerce.controller.admin;
+package practice.mayank.ecommerce.controller.management;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Positive;
@@ -12,11 +12,10 @@ import practice.mayank.ecommerce.dto.order.OrderResponse;
 import practice.mayank.ecommerce.dto.order.OrderStatusRequest;
 import practice.mayank.ecommerce.entity.OrderStatus;
 import practice.mayank.ecommerce.service.OrderService;
-import java.util.Set;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/admin/orders")
+@RequestMapping("/management-workspace/order")
 @Validated
 public class OrderManagementController {
 
@@ -24,7 +23,7 @@ public class OrderManagementController {
 
     @GetMapping("/get/{id}")
     public ResponseEntity<OrderResponse> getPlacedOrderById(@PathVariable String id) {
-        OrderResponse ordersById = orderService.getOrdersById(id);
+        OrderResponse ordersById = orderService.getOrderById(id);
         return ResponseEntity.ok(ordersById);
     }
 

@@ -25,8 +25,7 @@ public class OrderController {
 
     @GetMapping("/get")
     public ResponseEntity<OrderResponse> getOrderById(@RequestParam(name = "id") String orderId){
-        User authenticatedUser = UserService.getAuthenticatedUser();
-        OrderResponse ordersById = orderService.getOrdersById(authenticatedUser, orderId);
+        OrderResponse ordersById = orderService.getUserOrderById(orderId);
         return ResponseEntity.ok(ordersById);
     }
 
@@ -41,22 +40,19 @@ public class OrderController {
             @Max(20)
             int pageSize
     ){
-        User authenticatedUser = UserService.getAuthenticatedUser();
-        Page<OrderResponse> allOrders = orderService.getAllOrders(authenticatedUser, pageNumber, pageSize);
+        Page<OrderResponse> allOrders = orderService.getAllUserOrders(pageNumber, pageSize);
         return ResponseEntity.ok(allOrders);
     }
 
     @PostMapping("/place-order")
     public ResponseEntity<OrderResponse> placeOrder(){
-        User user = UserService.getAuthenticatedUser();
-        OrderResponse orderResponse = orderService.placeOrder(user);
+        OrderResponse orderResponse = orderService.placeOrder();
         return new ResponseEntity<>(orderResponse, HttpStatus.CREATED);
     }
 
     @PatchMapping("/cancel-order")
     public ResponseEntity<?> cancelOrder(@RequestParam(name = "id") String orderId){
-        User authenticatedUser = UserService.getAuthenticatedUser();
-        orderService.cancelOrder(authenticatedUser, orderId);
+        orderService.cancelUserOrder(orderId);
         return ResponseEntity.noContent().build();
     }
 
