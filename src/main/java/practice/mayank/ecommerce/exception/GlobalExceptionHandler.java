@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import practice.mayank.ecommerce.exception.customexception.*;
+import practice.mayank.ecommerce.security.exceptions.PermissionDeniedException;
 
 import java.util.HashMap;
 
@@ -86,6 +87,22 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler
     public ResponseEntity<ProblemDetail> handleAlreadyCancelledException(AlreadyCancelledException ex, WebRequest request) {
+        ProblemDetail problemDetail = ErrorResponseUtil.of(
+                ex.getMessage(), HttpStatus.BAD_REQUEST, request);
+
+        return ResponseEntity.badRequest().body(problemDetail);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ProblemDetail> handleActionNotAllowedException(ActionNotAllowedException ex, WebRequest request) {
+        ProblemDetail problemDetail = ErrorResponseUtil.of(
+                ex.getMessage(), HttpStatus.BAD_REQUEST, request);
+
+        return ResponseEntity.badRequest().body(problemDetail);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ProblemDetail> handlePermissionDeniedException(PermissionDeniedException ex, WebRequest request) {
         ProblemDetail problemDetail = ErrorResponseUtil.of(
                 ex.getMessage(), HttpStatus.BAD_REQUEST, request);
 
